@@ -1,4 +1,4 @@
-软件包下载
+# 1.软件包下载
 
 [STM32CubeF4](https://github.com/STMicroelectronics/STM32CubeF4) 
 
@@ -10,5 +10,8 @@
 
    
 
+# 2.CMSIS软件包下载
 
-
+1. [CMSIS_5](https://github.com/ARM-software/CMSIS_5) 
+2. STM32CubeF4软件包 CMSIS路径下
+3. MDK C:\Users\HP\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS路径下
