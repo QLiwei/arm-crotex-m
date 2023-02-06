@@ -1824,7 +1824,7 @@ __NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void)
    	RCC_OscInitStruct.PLL.PLLM = 25;
    	RCC_OscInitStruct.PLL.PLLN = 336;
    	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-   	RCC_OscInitStruct.PLL.PLLQ = 4;
+   	RCC_OscInitStruct.PLL.PLLQ = 4;q1
    	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
    	{
            //Error_Handler(__FILE__, __LINE__);
@@ -1859,3 +1859,44 @@ __NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void)
 
    
 
+# 6.GPIO基础
+
+## 6.1 GPIO功能简介
+
+- 输出状态：开漏/推挽 + 上拉/下拉电阻
+- 输出数据状态寄存器(GPIOx_ODR)或外设(复用模式)输出数据
+- GPIO速度等级 IO补偿
+- 输入状态：浮空 上拉/下拉 模拟
+- 输入寄存器(GPIOx_IDR)或者外设输入数据
+- 寄存器GPIOx_BSRR实现对寄存器GPIOx_ODR的为操作
+- 寄存器GPIOx_LCKR的锁机制，实现冻结IO口配置
+- 每两个时钟周期可以翻转一次IO
+- 引脚复用功能
+
+## 6.2 GPIO模式分析
+
+- 输入浮空
+- 输入上拉
+- 输入下拉
+- 模拟功能
+- 具有上拉或下拉功能的开漏输出
+- 具有上拉或下拉功能的推挽输出
+- 具有上拉或下拉功能的复用功能推挽
+- 具有上拉或下拉功能的复用功能开漏
+
+**由于上拉和下拉是可选配置，对应的 HAL 库配置使用下面 6 种就可以表示：**
+
+- GPIO_MODE_INPUT 输入模式
+- GPIO_MODE_OUTPUT_PP 推挽输出
+- GPIO_MODE_OUTPUT_OD 开漏输出
+- GPIO_MODE_AF_PP 复用推挽
+- GPIO_MODE_AF_OD 复用开漏
+- GPIO_MODE_ANALOG 模拟模式
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230206-165054.png)
+
+### 6.2.1 推挽输出
+
+[Output driver]
+
+推挽电路是两个参数相同的三极管或 MOSFET，以推挽方式存在于电路中。 电路工作时，两只对称的开关管每次只有一个导通，导通损耗小、效率高。输出既可以向负载灌电流，也可以从负载抽取电流。推拉式输出级提高电路的负载能力。 相对于开漏输出模式，推挽输出最大优势是输出高电平时，上升时间快，电压驱动能力强。
