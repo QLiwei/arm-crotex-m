@@ -29,6 +29,8 @@ __pycache__/
 *.a
 *.i
 *.d
+*.__i
+*.lnp
 
 # rt-thread config backup
 *.old
