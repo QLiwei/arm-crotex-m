@@ -1979,3 +1979,1618 @@ IO 补偿单元用于控制 I/O 通信压摆率（tfall / trise）以此来降�
   流消耗，它们必须配置为模拟模式，或内部强制为确定的数字值。这可通过使用上拉 / 下拉电阻或
 
   将引脚配置为输出模式做到。
+
+# 7.HAL库API
+
+1. 系统上电复位,进入启动文件startup_stm32f407xx.s->执行中断复位程序
+   1. 在复位中断程序中执行SystemInit-> system_stm32f4xx.c
+   2. 调用编译器封装好的函数,比如MDK的启动文件是调用__main,最后调用main函数
+2. main()
+   1. HAL库初始化函数HAL_Init-> stm32f4xx_hal.c
+   2. 系统时钟初始化->stm32f4xx_hal_rcc.c
+
+**依次使用的库文件**
+
+- startup_stm32f407xx.s
+- system_stm32f4xx.c
+- stm32f4xx_hal.c
+- stm32f4xx_hal_cortex.c
+- stm32f4xx_hal_rcc.c
+- core_cm4.h
+
+## 7.1 stm32f4xx_hal.c
+
+- HAL 库中各个外设驱动里面的延迟实现是基于此文件提供的时间基准，而这个时间基准既可以使用滴答定时器实现也可以使用通用的定时器实现，默认情况下是用的滴答定时器。
+- 函数 HAL_Init 里面会调用时间基准初始化函数 HAL_InitTick，而调用函数 HAL_RCC_ClockConfig也会调用时间基准初始化函数 HAL_InitTick。
+- 如果在中断服务程序里面调用延迟函数 HAL_Delay 要特别注意，因为这个函数的时间基准是基于滴答定时器或者其他通用定时器实现，实现方式是滴答定时器或者其他通用定时器里面做了个变量计数。如此一来，结果是显而易见的，如果其他中断服务程序调用了此函数，且中断优先级高于滴答定时器，会导致滴答定时器中断服务程序一直得不到执行，从而卡死在里面。所以滴答定时器的中断优先级一定要比它们高。
+
+### 7.2.1 HAL_Init()
+
+```c
+/**
+  * @brief  This function is used to initialize the HAL Library; it must be the first 
+  *         instruction to be executed in the main program (before to call any other
+  *         HAL function), it performs the following:
+  *           Configure the Flash prefetch, instruction and Data caches.
+  *           Configures the SysTick to generate an interrupt each 1 millisecond,
+  *           which is clocked by the HSI (at this stage, the clock is not yet
+  *           configured and thus the system is running from the internal HSI at 16 MHz).
+  *           Set NVIC Group Priority to 4.
+  *           Calls the HAL_MspInit() callback function defined in user file 
+  *           "stm32f4xx_hal_msp.c" to do the global low level hardware initialization 
+  *            
+  * @note   SysTick is used as time base for the HAL_Delay() function, the application
+  *         need to ensure that the SysTick time base is always set to 1 millisecond
+  *         to have correct HAL operation.
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_Init(void)
+{
+  /* Configure Flash prefetch, Instruction cache, Data cache */ 
+#if (INSTRUCTION_CACHE_ENABLE != 0U)
+  __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
+#endif /* INSTRUCTION_CACHE_ENABLE */
+
+#if (DATA_CACHE_ENABLE != 0U)
+  __HAL_FLASH_DATA_CACHE_ENABLE();
+#endif /* DATA_CACHE_ENABLE */
+
+#if (PREFETCH_ENABLE != 0U)
+  __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+#endif /* PREFETCH_ENABLE */
+
+  /* Set Interrupt Group Priority */
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
+  /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
+  HAL_InitTick(TICK_INT_PRIORITY);
+
+  /* Init the low level hardware */
+  HAL_MspInit();
+
+  /* Return function status */
+  return HAL_OK;
+}
+```
+
+- __HAL_FLASH_INSTRUCTION_CACHE_ENABLE
+- __HAL_FLASH_DATA_CACHE_ENABLE
+- __HAL_FLASH_PREFETCH_BUFFER_ENABLE
+- NVIC_PRIORITYGROUP_4
+- 滴答定时器的每 1ms 中断一次
+- HAL 库不像之前的标准库，在系统启动函数 SystemInit 里面做了 RCC 初始化，HAL 库是没有做的，所以进入到 main 函数后，系统还在用内部高速时钟 HSI，对于 F4 来说，HSI 主频是 16MHz。
+- 函数 HAL_Init 里面调用的 HAL_MspInit 一般在文件 stm32f4xx_hal_msp.c 里面做具体实现，主要用于底层初始化。当前此函数也在文件 stm32f4xx_hal.c 里面，只是做了弱定义。
+- 返回值，返回 HAL_ERROR 表示参数错误，HAL_OK 表示发送成功，HAL_BUSY 表示忙，正在使用中。
+
+**注意事项:**
+
+- 必须在 main 函数里面优先调用此函数。
+- 用户务必保证每 1ms 一次滴答中断。
+
+### 7.2.2 HAL_DeInit()
+
+```c
+/**
+  * @brief  This function de-Initializes common part of the HAL and stops the systick.
+  *         This function is optional.   
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_DeInit(void)
+{
+  /* Reset of all peripherals */
+  __HAL_RCC_APB1_FORCE_RESET();
+  __HAL_RCC_APB1_RELEASE_RESET();
+
+  __HAL_RCC_APB2_FORCE_RESET();
+  __HAL_RCC_APB2_RELEASE_RESET();
+
+  __HAL_RCC_AHB1_FORCE_RESET();
+  __HAL_RCC_AHB1_RELEASE_RESET();
+
+  __HAL_RCC_AHB2_FORCE_RESET();
+  __HAL_RCC_AHB2_RELEASE_RESET();
+
+  __HAL_RCC_AHB3_FORCE_RESET();
+  __HAL_RCC_AHB3_RELEASE_RESET();
+
+  /* De-Init the low level hardware */
+  HAL_MspDeInit();
+    
+  /* Return function status */
+  return HAL_OK;
+}
+```
+
+此函数用于复位 HAL 库和滴答时钟
+
+- 复位了 APB1,2 的时钟以及 AHB1,2,3 的时钟
+- 函数 HAL_DeInit 里面调用的 HAL_MspDeInit 一般在文件 stm32f4xx_hal_msp.c 里面做具体实现，主要用于底层初始化，跟函数 HAL_Init 里面调用的 HAL_MspInit 是一对。当前此函数也在文件stm32f4xx_hal.c 里面，只是做了弱定义。
+
+### 7.2.3 HAL_InitTick()
+
+```c
+/**
+  * @brief This function configures the source of the time base.
+  *        The time source is configured  to have 1ms time base with a dedicated 
+  *        Tick interrupt priority.
+  * @note This function is called  automatically at the beginning of program after
+  *       reset by HAL_Init() or at any time when clock is reconfigured  by HAL_RCC_ClockConfig().
+  * @note In the default implementation, SysTick timer is the source of time base. 
+  *       It is used to generate interrupts at regular time intervals. 
+  *       Care must be taken if HAL_Delay() is called from a peripheral ISR process, 
+  *       The SysTick interrupt must have higher priority (numerically lower)
+  *       than the peripheral interrupt. Otherwise the caller ISR process will be blocked.
+  *       The function is declared as __weak  to be overwritten  in case of other
+  *       implementation  in user file.
+  * @param TickPriority Tick interrupt priority.
+  * @retval HAL status
+  */
+__weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
+{
+  /* Configure the SysTick to have interrupt in 1ms time basis*/
+  if (HAL_SYSTICK_Config(SystemCoreClock / (1000U / uwTickFreq)) > 0U)
+  {
+    return HAL_ERROR;
+  }
+
+  /* Configure the SysTick IRQ priority */
+  if (TickPriority < (1UL << __NVIC_PRIO_BITS))
+  {
+    HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority, 0U);
+    uwTickPrio = TickPriority;
+  }
+  else
+  {
+    return HAL_ERROR;
+  }
+
+  /* Return function status */
+  return HAL_OK;
+}
+```
+
+此函数用于初始化滴答时钟
+
+- 此函数有个前缀__weak ，表示弱定义，用户可以重定义
+- 此函数用于初始化滴答时钟 1ms 中断一次，并且为滴答中断配置一个用户指定的优先级
+- 此函数由 HAL_Init 调用，或者任何其它地方调用函数 HAL_RCC_ClockConfig 配置 RCC 的时候也会调用 HAL_InitTick
+- 调用基于此函数实现的 HAL_Delay 要特别注意，因为这个函数的时间基准是基于滴答定时器或者其他通用定时器实现，实现方式是滴答定时器或者其他通用定时器里面做了个变量计数。如此一来，结果是显而易见的，如果其他中断服务程序调用了此函数，且中断优先级高于滴答定时器，会导致滴答定时器中断服务程序一直得不到执行，从而卡死在里面。所以滴答定时器的中断优先级一定要比它们高。
+- TickPriority 用于设置滴答定时器优先级
+
+### 7.2.4 Systick相关函数
+
+```
+void HAL_IncTick(void);
+void HAL_Delay(uint32_t Delay);
+uint32_t HAL_GetTick(void);
+uint32_t HAL_GetTickPrio(void);
+HAL_StatusTypeDef HAL_SetTickFreq(HAL_TickFreqTypeDef Freq);
+HAL_TickFreqTypeDef HAL_GetTickFreq(void);
+void HAL_SuspendTick(void);
+void HAL_ResumeTick(void);
+```
+
+### 7.2.5 低功耗状态下继续使用调试功能
+
+如果希望在睡眠，停机和待机的低功耗模式下继续使用调试功能，调用下面的函数
+
+```c
+/**
+  * @brief  Enable the Debug Module during SLEEP mode
+  * @retval None
+  */
+void HAL_DBGMCU_EnableDBGSleepMode(void)
+{
+  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
+}
+
+/**
+  * @brief  Disable the Debug Module during SLEEP mode
+  * @retval None
+  */
+void HAL_DBGMCU_DisableDBGSleepMode(void)
+{
+  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
+}
+
+/**
+  * @brief  Enable the Debug Module during STOP mode
+  * @retval None
+  */
+void HAL_DBGMCU_EnableDBGStopMode(void)
+{
+  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
+}
+
+/**
+  * @brief  Disable the Debug Module during STOP mode
+  * @retval None
+  */
+void HAL_DBGMCU_DisableDBGStopMode(void)
+{
+  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
+}
+
+/**
+  * @brief  Enable the Debug Module during STANDBY mode
+  * @retval None
+  */
+void HAL_DBGMCU_EnableDBGStandbyMode(void)
+{
+  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
+}
+
+/**
+  * @brief  Disable the Debug Module during STANDBY mode
+  * @retval None
+  */
+void HAL_DBGMCU_DisableDBGStandbyMode(void)
+{
+  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
+}
+
+```
+
+## 7.2 stm32f4xx_hal_rcc.c
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230206-155951.png) 
+
+实现内部和外部时钟（HSE、HSI、LSE、LSI、PLL、CSS、MCO）以及总线时钟（SYSCLK、AHB1、AHB2、AHB3、APB1）的配置
+
+- 系统上电复位后，通过内部高速时钟 HSI 运行（主频 16MHz），Flash 工作在 0 等待周期，所有外设除了 SRAM、Flash、JTAG 和 PWR，时钟都是关闭的。
+  - AHB 和 APB 总线无分频，所有挂载这两类总线上的外设都是以 HSI 频率运行。
+  - 所有的 GPIO 都是模拟模式，除了 JTAG 相关的几个引脚。
+- 系统上电复位后，用户需要完成以下工作
+  - 选择用于驱动系统时钟的时钟源
+  - 配置系统时钟频率和 Flash 设置
+  - 配置分频器
+  - 使能外设时钟
+  - 配置外设时钟源，部分外设的时钟可以不来自系统时钟（I2S, RTC, ADC, USB OTGFS/SDIO/RNG）。
+
+**RCC局限性**
+
+使能了外设时钟后，不能立即操作对应的寄存器，要加延迟。不同外设延迟不同：
+
+- 如果是 AHB 的外设，使能了时钟后，需要等待 2 个 AHB 时钟周期才可以操作这个外设的寄存器。
+- 如果是 APB 的外设，使能了时钟后，需要等待 2 个 APB 时钟周期才可以操作这个外设的寄存器。
+
+当前 HAL 库的解决方案是在使能了外设时钟后，再搞一个读操作，算是当做延迟用。
+
+```c
+#define __HAL_RCC_GPIOA_CLK_ENABLE()   do { \
+                                        __IO uint32_t tmpreg = 0x00U; \
+                                        SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);\
+                                        /* Delay after an RCC peripheral clock enabling */ \
+                                        tmpreg = READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);\
+                                        UNUSED(tmpreg); \
+                                          } while(0U)
+```
+
+**时钟知识补充**
+
+1. PCLK1,2和HCLK对应哪些时钟
+
+   1. PCLK1,PCLK2对应APB总线APB1,APB2时钟
+
+   2. HCLK对应AHB总线
+
+      ![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230207-141619.png) 
+
+2. 内部和外部时钟配置
+
+   1. HSI(high-speed internal)
+
+      高速内部 RC 振荡器，可以直接或者通过 PLL 倍频后做系统时钟源。缺点是精度差些，即使经过校准。
+
+   2. LSI (low-speed internal)
+
+      低速内部时钟，主要用于独立看门狗和 RTC 的时钟源。
+
+   3. HSE (high-speed external)
+
+      高速外部晶振，可接 4 - 26M 的晶振，可以直接或者通过 PLL 倍频后做系统时钟源，也可以做 RTC的是时钟源。
+
+   4. LSE (low-speed external)
+
+      低速外部晶振，主要用于 RTC。
+
+   5. CSS (Clock security system)
+
+      时钟安全系统，一旦使能后，如果 HSE 启动失败（不管是直接作为系统时钟源还是通过 PLL 输出后做系统时钟源），系统时钟将切换到 HSI。如果使能了中断的话，将进入不可屏蔽中断 NMI。
+
+   6. MCO1 (micro controller clock output)
+
+      可以在 PA8 引脚输出 SYSCLK、PLLI2SCLK、HSE 和 PLLCLK
+
+   7. MCO2 (micro controller clock output)
+
+      可以在 PC9 引脚输出 LSE、HSE、HSI 和 PLLCLK。
+
+   8. PLL 锁相环，时钟输入来自 HSI , HSE 或者 CSI
+
+### 7.2.1 HAL_RCC_DeInit()
+
+```c
+/**
+  * @brief  Resets the RCC clock configuration to the default reset state.
+  * @note   The default reset state of the clock configuration is given below:
+  *            - HSI ON and used as system clock source
+  *            - HSE and PLL OFF
+  *            - AHB, APB1 and APB2 prescaler set to 1.
+  *            - CSS, MCO1 and MCO2 OFF
+  *            - All interrupts disabled
+  * @note   This function doesn't modify the configuration of the
+  *            - Peripheral clocks
+  *            - LSI, LSE and RTC clocks
+  * @retval HAL status
+  */
+__weak HAL_StatusTypeDef HAL_RCC_DeInit(void)
+{
+  return HAL_OK;
+}
+```
+
+文件 stm32f4xx_hal_rcc.c 里面的此函数是空的,具体实现放在了 stm32f4xx_hal_rcc_ex.c 里面的此函数里面
+
+此函数用于 RCC 复位函数，主要实现如下功能
+
+- HSI 打开作为系统时钟
+- HSE 和 PLL 关闭
+- AHB, APB1 和 APB2 总线无分频 
+- CSS, MCO1 和 MCO2 关闭
+- 所有中断关闭
+
+此函数不会修改外设时钟，LSI、LSE 和 RTC 时钟。
+
+### 7.2.2 HAL_RCC_OscConfig()
+
+```c
+/**
+  * @brief  Initializes the RCC Oscillators according to the specified parameters in the
+  *         RCC_OscInitTypeDef.
+  * @param  RCC_OscInitStruct pointer to an RCC_OscInitTypeDef structure that
+  *         contains the configuration information for the RCC Oscillators.
+  * @note   The PLL is not disabled when used as system clock.
+  * @note   Transitions LSE Bypass to LSE On and LSE On to LSE Bypass are not
+  *         supported by this API. User should request a transition to LSE Off
+  *         first and then LSE On or LSE Bypass.
+  * @note   Transition HSE Bypass to HSE On and HSE On to HSE Bypass are not
+  *         supported by this API. User should request a transition to HSE Off
+  *         first and then HSE On or HSE Bypass.
+  * @retval HAL status
+  */
+__weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruct)
+{
+  uint32_t tickstart, pll_config;
+
+  /* Check Null pointer */
+  if(RCC_OscInitStruct == NULL)
+  {
+    return HAL_ERROR;
+  }
+
+  /* Check the parameters */
+  assert_param(IS_RCC_OSCILLATORTYPE(RCC_OscInitStruct->OscillatorType));
+  /*------------------------------- HSE Configuration ------------------------*/
+  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_HSE) == RCC_OSCILLATORTYPE_HSE)
+  {
+    /* Check the parameters */
+    assert_param(IS_RCC_HSE(RCC_OscInitStruct->HSEState));
+    /* When the HSE is used as system clock or clock source for PLL in these cases HSE will not disabled */
+    if((__HAL_RCC_GET_SYSCLK_SOURCE() == RCC_CFGR_SWS_HSE) ||\
+      ((__HAL_RCC_GET_SYSCLK_SOURCE() == RCC_CFGR_SWS_PLL) && ((RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) == RCC_PLLCFGR_PLLSRC_HSE)))
+    {
+      if((__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) != RESET) && (RCC_OscInitStruct->HSEState == RCC_HSE_OFF))
+      {
+        return HAL_ERROR;
+      }
+    }
+    else
+    {
+      /* Set the new HSE configuration ---------------------------------------*/
+      __HAL_RCC_HSE_CONFIG(RCC_OscInitStruct->HSEState);
+
+      /* Check the HSE State */
+      if((RCC_OscInitStruct->HSEState) != RCC_HSE_OFF)
+      {
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till HSE is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) == RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > HSE_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+      else
+      {
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till HSE is bypassed or disabled */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) != RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > HSE_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+    }
+  }
+  /*----------------------------- HSI Configuration --------------------------*/
+  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_HSI) == RCC_OSCILLATORTYPE_HSI)
+  {
+    /* Check the parameters */
+    assert_param(IS_RCC_HSI(RCC_OscInitStruct->HSIState));
+    assert_param(IS_RCC_CALIBRATION_VALUE(RCC_OscInitStruct->HSICalibrationValue));
+
+    /* Check if HSI is used as system clock or as PLL source when PLL is selected as system clock */
+    if((__HAL_RCC_GET_SYSCLK_SOURCE() == RCC_CFGR_SWS_HSI) ||\
+      ((__HAL_RCC_GET_SYSCLK_SOURCE() == RCC_CFGR_SWS_PLL) && ((RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) == RCC_PLLCFGR_PLLSRC_HSI)))
+    {
+      /* When HSI is used as system clock it will not disabled */
+      if((__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY) != RESET) && (RCC_OscInitStruct->HSIState != RCC_HSI_ON))
+      {
+        return HAL_ERROR;
+      }
+      /* Otherwise, just the calibration is allowed */
+      else
+      {
+        /* Adjusts the Internal High Speed oscillator (HSI) calibration value.*/
+        __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(RCC_OscInitStruct->HSICalibrationValue);
+      }
+    }
+    else
+    {
+      /* Check the HSI State */
+      if((RCC_OscInitStruct->HSIState)!= RCC_HSI_OFF)
+      {
+        /* Enable the Internal High Speed oscillator (HSI). */
+        __HAL_RCC_HSI_ENABLE();
+
+        /* Get Start Tick*/
+        tickstart = HAL_GetTick();
+
+        /* Wait till HSI is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY) == RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > HSI_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+
+        /* Adjusts the Internal High Speed oscillator (HSI) calibration value. */
+        __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(RCC_OscInitStruct->HSICalibrationValue);
+      }
+      else
+      {
+        /* Disable the Internal High Speed oscillator (HSI). */
+        __HAL_RCC_HSI_DISABLE();
+
+        /* Get Start Tick*/
+        tickstart = HAL_GetTick();
+
+        /* Wait till HSI is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY) != RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > HSI_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+    }
+  }
+  /*------------------------------ LSI Configuration -------------------------*/
+  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSI) == RCC_OSCILLATORTYPE_LSI)
+  {
+    /* Check the parameters */
+    assert_param(IS_RCC_LSI(RCC_OscInitStruct->LSIState));
+
+    /* Check the LSI State */
+    if((RCC_OscInitStruct->LSIState)!= RCC_LSI_OFF)
+    {
+      /* Enable the Internal Low Speed oscillator (LSI). */
+      __HAL_RCC_LSI_ENABLE();
+
+      /* Get Start Tick*/
+      tickstart = HAL_GetTick();
+
+      /* Wait till LSI is ready */
+      while(__HAL_RCC_GET_FLAG(RCC_FLAG_LSIRDY) == RESET)
+      {
+        if((HAL_GetTick() - tickstart ) > LSI_TIMEOUT_VALUE)
+        {
+          return HAL_TIMEOUT;
+        }
+      }
+    }
+    else
+    {
+      /* Disable the Internal Low Speed oscillator (LSI). */
+      __HAL_RCC_LSI_DISABLE();
+
+      /* Get Start Tick */
+      tickstart = HAL_GetTick();
+
+      /* Wait till LSI is ready */
+      while(__HAL_RCC_GET_FLAG(RCC_FLAG_LSIRDY) != RESET)
+      {
+        if((HAL_GetTick() - tickstart ) > LSI_TIMEOUT_VALUE)
+        {
+          return HAL_TIMEOUT;
+        }
+      }
+    }
+  }
+  /*------------------------------ LSE Configuration -------------------------*/
+  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSE) == RCC_OSCILLATORTYPE_LSE)
+  {
+    FlagStatus       pwrclkchanged = RESET;
+
+    /* Check the parameters */
+    assert_param(IS_RCC_LSE(RCC_OscInitStruct->LSEState));
+
+    /* Update LSE configuration in Backup Domain control register    */
+    /* Requires to enable write access to Backup Domain of necessary */
+    if(__HAL_RCC_PWR_IS_CLK_DISABLED())
+    {
+      __HAL_RCC_PWR_CLK_ENABLE();
+      pwrclkchanged = SET;
+    }
+
+    if(HAL_IS_BIT_CLR(PWR->CR, PWR_CR_DBP))
+    {
+      /* Enable write access to Backup domain */
+      SET_BIT(PWR->CR, PWR_CR_DBP);
+
+      /* Wait for Backup domain Write protection disable */
+      tickstart = HAL_GetTick();
+
+      while(HAL_IS_BIT_CLR(PWR->CR, PWR_CR_DBP))
+      {
+        if((HAL_GetTick() - tickstart) > RCC_DBP_TIMEOUT_VALUE)
+        {
+          return HAL_TIMEOUT;
+        }
+      }
+    }
+
+    /* Set the new LSE configuration -----------------------------------------*/
+    __HAL_RCC_LSE_CONFIG(RCC_OscInitStruct->LSEState);
+    /* Check the LSE State */
+    if((RCC_OscInitStruct->LSEState) != RCC_LSE_OFF)
+    {
+      /* Get Start Tick*/
+      tickstart = HAL_GetTick();
+
+      /* Wait till LSE is ready */
+      while(__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY) == RESET)
+      {
+        if((HAL_GetTick() - tickstart ) > RCC_LSE_TIMEOUT_VALUE)
+        {
+          return HAL_TIMEOUT;
+        }
+      }
+    }
+    else
+    {
+      /* Get Start Tick */
+      tickstart = HAL_GetTick();
+
+      /* Wait till LSE is ready */
+      while(__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY) != RESET)
+      {
+        if((HAL_GetTick() - tickstart ) > RCC_LSE_TIMEOUT_VALUE)
+        {
+          return HAL_TIMEOUT;
+        }
+      }
+    }
+
+    /* Restore clock configuration if changed */
+    if(pwrclkchanged == SET)
+    {
+      __HAL_RCC_PWR_CLK_DISABLE();
+    }
+  }
+  /*-------------------------------- PLL Configuration -----------------------*/
+  /* Check the parameters */
+  assert_param(IS_RCC_PLL(RCC_OscInitStruct->PLL.PLLState));
+  if ((RCC_OscInitStruct->PLL.PLLState) != RCC_PLL_NONE)
+  {
+    /* Check if the PLL is used as system clock or not */
+    if(__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_CFGR_SWS_PLL)
+    {
+      if((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_ON)
+      {
+        /* Check the parameters */
+        assert_param(IS_RCC_PLLSOURCE(RCC_OscInitStruct->PLL.PLLSource));
+        assert_param(IS_RCC_PLLM_VALUE(RCC_OscInitStruct->PLL.PLLM));
+        assert_param(IS_RCC_PLLN_VALUE(RCC_OscInitStruct->PLL.PLLN));
+        assert_param(IS_RCC_PLLP_VALUE(RCC_OscInitStruct->PLL.PLLP));
+        assert_param(IS_RCC_PLLQ_VALUE(RCC_OscInitStruct->PLL.PLLQ));
+
+        /* Disable the main PLL. */
+        __HAL_RCC_PLL_DISABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) != RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+
+        /* Configure the main PLL clock source, multiplication and division factors. */
+        WRITE_REG(RCC->PLLCFGR, (RCC_OscInitStruct->PLL.PLLSource                                            | \
+                                 RCC_OscInitStruct->PLL.PLLM                                                 | \
+                                 (RCC_OscInitStruct->PLL.PLLN << RCC_PLLCFGR_PLLN_Pos)             | \
+                                 (((RCC_OscInitStruct->PLL.PLLP >> 1U) - 1U) << RCC_PLLCFGR_PLLP_Pos) | \
+                                 (RCC_OscInitStruct->PLL.PLLQ << RCC_PLLCFGR_PLLQ_Pos)));
+        /* Enable the main PLL. */
+        __HAL_RCC_PLL_ENABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) == RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+      else
+      {
+        /* Disable the main PLL. */
+        __HAL_RCC_PLL_DISABLE();
+
+        /* Get Start Tick */
+        tickstart = HAL_GetTick();
+
+        /* Wait till PLL is ready */
+        while(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) != RESET)
+        {
+          if((HAL_GetTick() - tickstart ) > PLL_TIMEOUT_VALUE)
+          {
+            return HAL_TIMEOUT;
+          }
+        }
+      }
+    }
+    else
+    {
+      /* Check if there is a request to disable the PLL used as System clock source */
+      if((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_OFF)
+      {
+        return HAL_ERROR;
+      }
+      else
+      {
+        /* Do not return HAL_ERROR if request repeats the current configuration */
+        pll_config = RCC->PLLCFGR;
+#if defined (RCC_PLLCFGR_PLLR)
+        if (((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_OFF) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLSRC) != RCC_OscInitStruct->PLL.PLLSource) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLM) != (RCC_OscInitStruct->PLL.PLLM) << RCC_PLLCFGR_PLLM_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLN) != (RCC_OscInitStruct->PLL.PLLN) << RCC_PLLCFGR_PLLN_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLP) != (((RCC_OscInitStruct->PLL.PLLP >> 1U) - 1U)) << RCC_PLLCFGR_PLLP_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLQ) != (RCC_OscInitStruct->PLL.PLLQ << RCC_PLLCFGR_PLLQ_Pos)) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLR) != (RCC_OscInitStruct->PLL.PLLR << RCC_PLLCFGR_PLLR_Pos)))
+#else
+        if (((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_OFF) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLSRC) != RCC_OscInitStruct->PLL.PLLSource) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLM) != (RCC_OscInitStruct->PLL.PLLM) << RCC_PLLCFGR_PLLM_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLN) != (RCC_OscInitStruct->PLL.PLLN) << RCC_PLLCFGR_PLLN_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLP) != (((RCC_OscInitStruct->PLL.PLLP >> 1U) - 1U)) << RCC_PLLCFGR_PLLP_Pos) ||
+            (READ_BIT(pll_config, RCC_PLLCFGR_PLLQ) != (RCC_OscInitStruct->PLL.PLLQ << RCC_PLLCFGR_PLLQ_Pos)))
+#endif
+        {
+          return HAL_ERROR;
+        }
+      }
+    }
+  }
+  return HAL_OK;
+}
+```
+
+**配置HSE,HSI,LSI,LSE,PLL**
+
+函数的形参是 RCC_OscInitTypeDef 类型结构体变量
+
+```c
+/**
+  * @brief  RCC Internal/External Oscillator (HSE, HSI, LSE and LSI) configuration structure definition
+  */
+typedef struct
+{
+  uint32_t OscillatorType;       /*!< The oscillators to be configured.
+                                      This parameter can be a value of @ref RCC_Oscillator_Type                   */
+
+  uint32_t HSEState;             /*!< The new state of the HSE.
+                                      This parameter can be a value of @ref RCC_HSE_Config                        */
+
+  uint32_t LSEState;             /*!< The new state of the LSE.
+                                      This parameter can be a value of @ref RCC_LSE_Config                        */
+
+  uint32_t HSIState;             /*!< The new state of the HSI.
+                                      This parameter can be a value of @ref RCC_HSI_Config                        */
+
+  uint32_t HSICalibrationValue;  /*!< The HSI calibration trimming value (default is RCC_HSICALIBRATION_DEFAULT).
+                                       This parameter must be a number between Min_Data = 0x00 and Max_Data = 0x1F */
+
+  uint32_t LSIState;             /*!< The new state of the LSI.
+                                      This parameter can be a value of @ref RCC_LSI_Config                        */
+
+  RCC_PLLInitTypeDef PLL;        /*!< PLL structure parameters                                                    */
+}RCC_OscInitTypeDef;
+
+```
+
+**注意事项：**
+
+1. LSE Bypass 切换到 LSE On 或者 LSE On 切换到 LSE Bypass 都不支持，用需要先关闭 LSE，然后才可以切换到 LSE Bypass 或者 LSE On
+2. HSE Bypass 切换到 HSE On 或者 LSE On 切换到 LSE Bypass 都不支持，用需要先关闭 HSE，然后才可以切换到 HSE Bypass 或者 HSE On
+
+```
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+
+	/* 使能HSE，并选择HSE作为PLL时钟源 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLM = 25;
+	RCC_OscInitStruct.PLL.PLLN = 336;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLQ = 4;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+        //Error_Handler(__FILE__, __LINE__);
+	}
+
+```
+
+### 7.2.3 HAL_RCC_ClockConfig()
+
+```c
+/**
+  * @brief  Initializes the CPU, AHB and APB busses clocks according to the specified
+  *         parameters in the RCC_ClkInitStruct.
+  * @param  RCC_ClkInitStruct pointer to an RCC_OscInitTypeDef structure that
+  *         contains the configuration information for the RCC peripheral.
+  * @param  FLatency FLASH Latency, this parameter depend on device selected
+  *
+  * @note   The SystemCoreClock CMSIS variable is used to store System Clock Frequency
+  *         and updated by HAL_RCC_GetHCLKFreq() function called within this function
+  *
+  * @note   The HSI is used (enabled by hardware) as system clock source after
+  *         startup from Reset, wake-up from STOP and STANDBY mode, or in case
+  *         of failure of the HSE used directly or indirectly as system clock
+  *         (if the Clock Security System CSS is enabled).
+  *
+  * @note   A switch from one clock source to another occurs only if the target
+  *         clock source is ready (clock stable after startup delay or PLL locked).
+  *         If a clock source which is not yet ready is selected, the switch will
+  *         occur when the clock source will be ready.
+  *
+  * @note   Depending on the device voltage range, the software has to set correctly
+  *         HPRE[3:0] bits to ensure that HCLK not exceed the maximum allowed frequency
+  *         (for more details refer to section above "Initialization/de-initialization functions")
+  * @retval None
+  */
+HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, uint32_t FLatency)
+{
+  uint32_t tickstart;
+
+  /* Check Null pointer */
+  if(RCC_ClkInitStruct == NULL)
+  {
+    return HAL_ERROR;
+  }
+
+  /* Check the parameters */
+  assert_param(IS_RCC_CLOCKTYPE(RCC_ClkInitStruct->ClockType));
+  assert_param(IS_FLASH_LATENCY(FLatency));
+
+  /* To correctly read data from FLASH memory, the number of wait states (LATENCY)
+    must be correctly programmed according to the frequency of the CPU clock
+    (HCLK) and the supply voltage of the device. */
+
+  /* Increasing the number of wait states because of higher CPU frequency */
+  if(FLatency > __HAL_FLASH_GET_LATENCY())
+  {
+    /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
+    __HAL_FLASH_SET_LATENCY(FLatency);
+
+    /* Check that the new number of wait states is taken into account to access the Flash
+    memory by reading the FLASH_ACR register */
+    if(__HAL_FLASH_GET_LATENCY() != FLatency)
+    {
+      return HAL_ERROR;
+    }
+  }
+
+  /*-------------------------- HCLK Configuration --------------------------*/
+  if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_HCLK) == RCC_CLOCKTYPE_HCLK)
+  {
+    /* Set the highest APBx dividers in order to ensure that we do not go through
+       a non-spec phase whatever we decrease or increase HCLK. */
+    if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_PCLK1) == RCC_CLOCKTYPE_PCLK1)
+    {
+      MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_HCLK_DIV16);
+    }
+
+    if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_PCLK2) == RCC_CLOCKTYPE_PCLK2)
+    {
+      MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, (RCC_HCLK_DIV16 << 3));
+    }
+
+    assert_param(IS_RCC_HCLK(RCC_ClkInitStruct->AHBCLKDivider));
+    MODIFY_REG(RCC->CFGR, RCC_CFGR_HPRE, RCC_ClkInitStruct->AHBCLKDivider);
+  }
+
+  /*------------------------- SYSCLK Configuration ---------------------------*/
+  if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_SYSCLK) == RCC_CLOCKTYPE_SYSCLK)
+  {
+    assert_param(IS_RCC_SYSCLKSOURCE(RCC_ClkInitStruct->SYSCLKSource));
+
+    /* HSE is selected as System Clock Source */
+    if(RCC_ClkInitStruct->SYSCLKSource == RCC_SYSCLKSOURCE_HSE)
+    {
+      /* Check the HSE ready flag */
+      if(__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) == RESET)
+      {
+        return HAL_ERROR;
+      }
+    }
+    /* PLL is selected as System Clock Source */
+    else if((RCC_ClkInitStruct->SYSCLKSource == RCC_SYSCLKSOURCE_PLLCLK)   ||
+            (RCC_ClkInitStruct->SYSCLKSource == RCC_SYSCLKSOURCE_PLLRCLK))
+    {
+      /* Check the PLL ready flag */
+      if(__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) == RESET)
+      {
+        return HAL_ERROR;
+      }
+    }
+    /* HSI is selected as System Clock Source */
+    else
+    {
+      /* Check the HSI ready flag */
+      if(__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY) == RESET)
+      {
+        return HAL_ERROR;
+      }
+    }
+
+    __HAL_RCC_SYSCLK_CONFIG(RCC_ClkInitStruct->SYSCLKSource);
+
+    /* Get Start Tick */
+    tickstart = HAL_GetTick();
+
+    while (__HAL_RCC_GET_SYSCLK_SOURCE() != (RCC_ClkInitStruct->SYSCLKSource << RCC_CFGR_SWS_Pos))
+    {
+      if ((HAL_GetTick() - tickstart) > CLOCKSWITCH_TIMEOUT_VALUE)
+      {
+        return HAL_TIMEOUT;
+      }
+    }
+  }
+
+  /* Decreasing the number of wait states because of lower CPU frequency */
+  if(FLatency < __HAL_FLASH_GET_LATENCY())
+  {
+     /* Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
+    __HAL_FLASH_SET_LATENCY(FLatency);
+
+    /* Check that the new number of wait states is taken into account to access the Flash
+    memory by reading the FLASH_ACR register */
+    if(__HAL_FLASH_GET_LATENCY() != FLatency)
+    {
+      return HAL_ERROR;
+    }
+  }
+
+  /*-------------------------- PCLK1 Configuration ---------------------------*/
+  if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_PCLK1) == RCC_CLOCKTYPE_PCLK1)
+  {
+    assert_param(IS_RCC_PCLK(RCC_ClkInitStruct->APB1CLKDivider));
+    MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_ClkInitStruct->APB1CLKDivider);
+  }
+
+  /*-------------------------- PCLK2 Configuration ---------------------------*/
+  if(((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_PCLK2) == RCC_CLOCKTYPE_PCLK2)
+  {
+    assert_param(IS_RCC_PCLK(RCC_ClkInitStruct->APB2CLKDivider));
+    MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, ((RCC_ClkInitStruct->APB2CLKDivider) << 3U));
+  }
+
+  /* Update the SystemCoreClock global variable */
+  SystemCoreClock = HAL_RCC_GetSysClockFreq() >> AHBPrescTable[(RCC->CFGR & RCC_CFGR_HPRE)>> RCC_CFGR_HPRE_Pos];
+
+  /* Configure the source of time base considering new system clocks settings */
+  HAL_InitTick (uwTickPrio);
+
+  return HAL_OK;
+}
+```
+
+**配置了 HCLK、SYSCLK、PLCK1 和 PLCK2**
+
+1. RCC_ClkInitTypeDef 类型的结构体变量
+2. Flash 的延迟设置
+
+**注意事项**
+
+1. 此函数会更新全局变量 SystemCoreClock 的主频值，并且会再次调用函数 HAL_InitTick 更新系统滴答时钟，这点要特别注意
+2. 系统上电复位或者从停机、待机模式唤醒后，使用的是 HSI 作为系统时钟。以防使用 HSE 直接或者通过 PLL 输出后做系统时钟时失败（如果使能了 CSS）
+3. 目标时钟就绪后才可以从当前的时钟源往这个目标时钟源切换，如果目标时钟源没有就绪，就会等待直到时钟源就绪才可以切换
+4. 根据设备的供电范围，必须正确设置 D1CPRE[3:0]位的范围，防止超过允许的最大频率
+
+```c
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+	/* 
+       选择PLL的输出作为系统时钟
+		HCLK = SYSCLK / 1  (AHB1Periph)
+		PCLK2 = HCLK / 2   (APB2Periph)
+		PCLK1 = HCLK / 4   (APB1Periph)
+    */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+								  |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+	/* 此函数会更新SystemCoreClock，并重新配置HAL_InitTick */
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+	{
+        Error_Handler(__FILE__, __LINE__);
+	}
+
+```
+
+### 7.2.4 HAL_RCC_MCOConfig()
+
+```c
+/**
+  * @brief  Selects the clock source to output on MCO1 pin(PA8) or on MCO2 pin(PC9).
+  * @note   PA8/PC9 should be configured in alternate function mode.
+  * @param  RCC_MCOx specifies the output direction for the clock source.
+  *          This parameter can be one of the following values:
+  *            @arg RCC_MCO1: Clock source to output on MCO1 pin(PA8).
+  *            @arg RCC_MCO2: Clock source to output on MCO2 pin(PC9).
+  * @param  RCC_MCOSource specifies the clock source to output.
+  *          This parameter can be one of the following values:
+  *            @arg RCC_MCO1SOURCE_HSI: HSI clock selected as MCO1 source
+  *            @arg RCC_MCO1SOURCE_LSE: LSE clock selected as MCO1 source
+  *            @arg RCC_MCO1SOURCE_HSE: HSE clock selected as MCO1 source
+  *            @arg RCC_MCO1SOURCE_PLLCLK: main PLL clock selected as MCO1 source
+  *            @arg RCC_MCO2SOURCE_SYSCLK: System clock (SYSCLK) selected as MCO2 source
+  *            @arg RCC_MCO2SOURCE_PLLI2SCLK: PLLI2S clock selected as MCO2 source, available for all STM32F4 devices except STM32F410xx
+  *            @arg RCC_MCO2SOURCE_I2SCLK: I2SCLK clock selected as MCO2 source, available only for STM32F410Rx devices
+  *            @arg RCC_MCO2SOURCE_HSE: HSE clock selected as MCO2 source
+  *            @arg RCC_MCO2SOURCE_PLLCLK: main PLL clock selected as MCO2 source
+  * @param  RCC_MCODiv specifies the MCOx prescaler.
+  *          This parameter can be one of the following values:
+  *            @arg RCC_MCODIV_1: no division applied to MCOx clock
+  *            @arg RCC_MCODIV_2: division by 2 applied to MCOx clock
+  *            @arg RCC_MCODIV_3: division by 3 applied to MCOx clock
+  *            @arg RCC_MCODIV_4: division by 4 applied to MCOx clock
+  *            @arg RCC_MCODIV_5: division by 5 applied to MCOx clock
+  * @note  For STM32F410Rx devices to output I2SCLK clock on MCO2 you should have
+  *        at last one of the SPI clocks enabled (SPI1, SPI2 or SPI5).
+  * @retval None
+  */
+void HAL_RCC_MCOConfig(uint32_t RCC_MCOx, uint32_t RCC_MCOSource, uint32_t RCC_MCODiv)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  /* Check the parameters */
+  assert_param(IS_RCC_MCO(RCC_MCOx));
+  assert_param(IS_RCC_MCODIV(RCC_MCODiv));
+  /* RCC_MCO1 */
+  if(RCC_MCOx == RCC_MCO1)
+  {
+    assert_param(IS_RCC_MCO1SOURCE(RCC_MCOSource));
+
+    /* MCO1 Clock Enable */
+    __MCO1_CLK_ENABLE();
+
+    /* Configure the MCO1 pin in alternate function mode */
+    GPIO_InitStruct.Pin = MCO1_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+    HAL_GPIO_Init(MCO1_GPIO_PORT, &GPIO_InitStruct);
+
+    /* Mask MCO1 and MCO1PRE[2:0] bits then Select MCO1 clock source and prescaler */
+    MODIFY_REG(RCC->CFGR, (RCC_CFGR_MCO1 | RCC_CFGR_MCO1PRE), (RCC_MCOSource | RCC_MCODiv));
+
+   /* This RCC MCO1 enable feature is available only on STM32F410xx devices */
+#if defined(RCC_CFGR_MCO1EN)
+    __HAL_RCC_MCO1_ENABLE();
+#endif /* RCC_CFGR_MCO1EN */
+  }
+#if defined(RCC_CFGR_MCO2)
+  else
+  {
+    assert_param(IS_RCC_MCO2SOURCE(RCC_MCOSource));
+
+    /* MCO2 Clock Enable */
+    __MCO2_CLK_ENABLE();
+
+    /* Configure the MCO2 pin in alternate function mode */
+    GPIO_InitStruct.Pin = MCO2_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+    HAL_GPIO_Init(MCO2_GPIO_PORT, &GPIO_InitStruct);
+
+    /* Mask MCO2 and MCO2PRE[2:0] bits then Select MCO2 clock source and prescaler */
+    MODIFY_REG(RCC->CFGR, (RCC_CFGR_MCO2 | RCC_CFGR_MCO2PRE), (RCC_MCOSource | (RCC_MCODiv << 3U)));
+
+   /* This RCC MCO2 enable feature is available only on STM32F410Rx devices */
+#if defined(RCC_CFGR_MCO2EN)
+    __HAL_RCC_MCO2_ENABLE();
+#endif /* RCC_CFGR_MCO2EN */
+  }
+#endif /* RCC_CFGR_MCO2 */
+}
+```
+
+此函数的作用是配置 MCO1（PA8 引脚）和 MCO2（PC9 引脚）的时钟输出以及选择的时钟源:
+
+- 参数1:选择输出的引脚，可选择 RCC_MCO1（PA8 引脚）或者 RCC_MCO2（PC9 引脚）。
+
+- 参数2:选择输出的时钟源，MCO1 可选择的时钟源如下
+
+  - RCC_MCO1SOURCE_HSI
+  - RCC_MCO1SOURCE_LSE
+  - RCC_MCO1SOURCE_HSE
+  - RCC_MCO1SOURCE_PLLCLK
+
+  MCO2:
+
+  - RCC_MCO2SOURCE_SYSCLK
+  - RCC_MCO2SOURCE_PLLI2SCLK
+  - RCC_MCO2SOURCE_I2SCLK
+  - RCC_MCO2SOURCE_HSE
+  - RCC_MCO2SOURCE_PLLCLK
+
+- 参数3:设置输出分频，范围从 RCC_MCODIV_1 到 RCC_MCODIV_4。
+
+### 7.2.5 RCC相关函数
+
+```c
+void     HAL_RCC_EnableCSS(void);
+void     HAL_RCC_DisableCSS(void);
+uint32_t HAL_RCC_GetSysClockFreq(void);
+uint32_t HAL_RCC_GetHCLKFreq(void);
+uint32_t HAL_RCC_GetPCLK1Freq(void);
+uint32_t HAL_RCC_GetPCLK2Freq(void);
+void     HAL_RCC_GetOscConfig(RCC_OscInitTypeDef *RCC_OscInitStruct);
+void     HAL_RCC_GetClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t *pFLatency);
+```
+
+## 7.3 stm32f4xx_hal_cortex.c
+
+这个库文件主要功能是 NVIC，MPU 和 Systick 的配置。此文件有个臃肿的地方，里面的 API 其实就是将 ARM 的 CMSIS 库各种 API 重新封装了一遍。这么做的好处是保证了 HAL 的 API 都是以字母 HAL开头。
+
+```c
+/* Initialization and de-initialization functions *****************************/
+void HAL_NVIC_SetPriorityGrouping(uint32_t PriorityGroup);
+void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority);
+void HAL_NVIC_EnableIRQ(IRQn_Type IRQn);
+void HAL_NVIC_DisableIRQ(IRQn_Type IRQn);
+void HAL_NVIC_SystemReset(void);
+uint32_t HAL_SYSTICK_Config(uint32_t TicksNumb);
+
+uint32_t HAL_NVIC_GetPriorityGrouping(void);
+void HAL_NVIC_GetPriority(IRQn_Type IRQn, uint32_t PriorityGroup, uint32_t* pPreemptPriority, uint32_t* pSubPriority);
+uint32_t HAL_NVIC_GetPendingIRQ(IRQn_Type IRQn);
+void HAL_NVIC_SetPendingIRQ(IRQn_Type IRQn);
+void HAL_NVIC_ClearPendingIRQ(IRQn_Type IRQn);
+uint32_t HAL_NVIC_GetActive(IRQn_Type IRQn);
+void HAL_SYSTICK_CLKSourceConfig(uint32_t CLKSource);
+void HAL_SYSTICK_IRQHandler(void);
+void HAL_SYSTICK_Callback(void);
+
+void HAL_MPU_Enable(uint32_t MPU_Control);
+void HAL_MPU_Disable(void);
+void HAL_MPU_ConfigRegion(MPU_Region_InitTypeDef *MPU_Init);
+```
+
+# 8. GPIO HAL库API
+
+> 很多时候，我们会直接调用 GPIO 的寄存器进行配置，而不使用 HAL 进行调用，以提高执行效率，特别是中断里面执行时。
+
+## 8.1 stm32f4xx_hal_gpio.c
+
+- 系统上电后，引脚默认状态是模拟模式。
+- 所有的引脚有弱上拉和弱下拉电阻，阻值范围 30-50KΩ。其中配置为模拟模式时，上拉和下拉被硬件禁止，其它的输入、输出和复用都可以配置上拉和下拉。
+- 在输出或者复用模式，每个引脚可以配置成推挽或者开漏，且有 GPIO 速度等级可配置。另外注意，不同的供电范围，实际速度等级是有些区别的
+- 每个 GPIO 都可以配置成外部中断/事件模式，但要特别注意，引脚要配置成输入模式，在芯片的内部有个多路选择器，选择引脚与 16 个外部中断/事件 EXTI0 - EXTI15 中的那个导通。这就决定了，每个外部中断/事件只能与一个引脚导通，如果用户配置了多个引脚 PA0，PB0，PC0 等，那么只有一个能够与 EXTI0 导通。
+
+### 8.1.1 HAL_GPIO_Init()
+
+```c
+/**
+  * @brief  Initializes the GPIOx peripheral according to the specified parameters in the GPIO_Init.
+  * @param  GPIOx where x can be (A..K) to select the GPIO peripheral for STM32F429X device or
+  *                      x can be (A..I) to select the GPIO peripheral for STM32F40XX and STM32F427X devices.
+  * @param  GPIO_Init pointer to a GPIO_InitTypeDef structure that contains
+  *         the configuration information for the specified GPIO peripheral.
+  * @retval None
+  */
+void HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
+{
+  uint32_t position;
+  uint32_t ioposition = 0x00U;
+  uint32_t iocurrent = 0x00U;
+  uint32_t temp = 0x00U;
+
+  /* Check the parameters */
+  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
+  assert_param(IS_GPIO_PIN(GPIO_Init->Pin));
+  assert_param(IS_GPIO_MODE(GPIO_Init->Mode));
+
+  /* Configure the port pins */
+  for(position = 0U; position < GPIO_NUMBER; position++)
+  {
+    /* Get the IO position */
+    ioposition = 0x01U << position;
+    /* Get the current IO position */
+    iocurrent = (uint32_t)(GPIO_Init->Pin) & ioposition;
+
+    if(iocurrent == ioposition)
+    {
+      /*--------------------- GPIO Mode Configuration ------------------------*/
+      /* In case of Output or Alternate function mode selection */
+      if(((GPIO_Init->Mode & GPIO_MODE) == MODE_OUTPUT) || \
+          (GPIO_Init->Mode & GPIO_MODE) == MODE_AF)
+      {
+        /* Check the Speed parameter */
+        assert_param(IS_GPIO_SPEED(GPIO_Init->Speed));
+        /* Configure the IO Speed */
+        temp = GPIOx->OSPEEDR; 
+        temp &= ~(GPIO_OSPEEDER_OSPEEDR0 << (position * 2U));
+        temp |= (GPIO_Init->Speed << (position * 2U));
+        GPIOx->OSPEEDR = temp;
+
+        /* Configure the IO Output Type */
+        temp = GPIOx->OTYPER;
+        temp &= ~(GPIO_OTYPER_OT_0 << position) ;
+        temp |= (((GPIO_Init->Mode & OUTPUT_TYPE) >> OUTPUT_TYPE_Pos) << position);
+        GPIOx->OTYPER = temp;
+       }
+
+      if((GPIO_Init->Mode & GPIO_MODE) != MODE_ANALOG)
+      {
+        /* Check the parameters */
+        assert_param(IS_GPIO_PULL(GPIO_Init->Pull));
+        
+        /* Activate the Pull-up or Pull down resistor for the current IO */
+        temp = GPIOx->PUPDR;
+        temp &= ~(GPIO_PUPDR_PUPDR0 << (position * 2U));
+        temp |= ((GPIO_Init->Pull) << (position * 2U));
+        GPIOx->PUPDR = temp;
+      }
+
+      /* In case of Alternate function mode selection */
+      if((GPIO_Init->Mode & GPIO_MODE) == MODE_AF)
+      {
+        /* Check the Alternate function parameter */
+        assert_param(IS_GPIO_AF(GPIO_Init->Alternate));
+        /* Configure Alternate function mapped with the current IO */
+        temp = GPIOx->AFR[position >> 3U];
+        temp &= ~(0xFU << ((uint32_t)(position & 0x07U) * 4U)) ;
+        temp |= ((uint32_t)(GPIO_Init->Alternate) << (((uint32_t)position & 0x07U) * 4U));
+        GPIOx->AFR[position >> 3U] = temp;
+      }
+
+      /* Configure IO Direction mode (Input, Output, Alternate or Analog) */
+      temp = GPIOx->MODER;
+      temp &= ~(GPIO_MODER_MODER0 << (position * 2U));
+      temp |= ((GPIO_Init->Mode & GPIO_MODE) << (position * 2U));
+      GPIOx->MODER = temp;
+
+      /*--------------------- EXTI Mode Configuration ------------------------*/
+      /* Configure the External Interrupt or event for the current IO */
+      if((GPIO_Init->Mode & EXTI_MODE) != 0x00U)
+      {
+        /* Enable SYSCFG Clock */
+        __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+        temp = SYSCFG->EXTICR[position >> 2U];
+        temp &= ~(0x0FU << (4U * (position & 0x03U)));
+        temp |= ((uint32_t)(GPIO_GET_INDEX(GPIOx)) << (4U * (position & 0x03U)));
+        SYSCFG->EXTICR[position >> 2U] = temp;
+
+        /* Clear Rising Falling edge configuration */
+        temp = EXTI->RTSR;
+        temp &= ~((uint32_t)iocurrent);
+        if((GPIO_Init->Mode & TRIGGER_RISING) != 0x00U)
+        {
+          temp |= iocurrent;
+        }
+        EXTI->RTSR = temp;
+
+        temp = EXTI->FTSR;
+        temp &= ~((uint32_t)iocurrent);
+        if((GPIO_Init->Mode & TRIGGER_FALLING) != 0x00U)
+        {
+          temp |= iocurrent;
+        }
+        EXTI->FTSR = temp;
+
+        temp = EXTI->EMR;
+        temp &= ~((uint32_t)iocurrent);
+        if((GPIO_Init->Mode & EXTI_EVT) != 0x00U)
+        {
+          temp |= iocurrent;
+        }
+        EXTI->EMR = temp;
+
+        /* Clear EXTI line configuration */
+        temp = EXTI->IMR;
+        temp &= ~((uint32_t)iocurrent);
+        if((GPIO_Init->Mode & EXTI_IT) != 0x00U)
+        {
+          temp |= iocurrent;
+        }
+        EXTI->IMR = temp;
+      }
+    }
+  }
+}
+```
+
+- GPIO 功能配置
+- 设置 EXTI 功能
+
+```
+/** 
+  * @brief GPIO Init structure definition  
+  */ 
+typedef struct
+{
+  uint32_t Pin;       /*!< Specifies the GPIO pins to be configured.
+                           This parameter can be any value of @ref GPIO_pins_define */
+
+  uint32_t Mode;      /*!< Specifies the operating mode for the selected pins.
+                           This parameter can be a value of @ref GPIO_mode_define */
+
+  uint32_t Pull;      /*!< Specifies the Pull-up or Pull-Down activation for the selected pins.
+                           This parameter can be a value of @ref GPIO_pull_define */
+
+  uint32_t Speed;     /*!< Specifies the speed for the selected pins.
+                           This parameter can be a value of @ref GPIO_speed_define */
+
+  uint32_t Alternate;  /*!< Peripheral to be connected to the selected pins. 
+                            This parameter can be a value of @ref GPIO_Alternate_function_selection */
+}GPIO_InitTypeDef;
+```
+
+**注意事项:**
+
+- HAL_GPIO_Init 对引脚的初始化是把同组 16 个引脚 for 循环检测了一遍，效率稍低
+
+  程序运行期间的引脚状态切换，最好采用下面的方式或者直接寄存器操作
+
+  ```c
+  GPIO_InitStruct.Pin = GPIO_PIN_0 |GPIO_PIN_1 | GPIO_PIN_2 ;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; 
+  GPIO_InitStruct.Pull = GPIO_NOPULL; 
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH; 
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct); //这里会执行 16 次 for 查询
+  ```
+
+### 8.1.2 HAL_GPIO_DeInit()
+
+```c
+/**
+  * @brief  De-initializes the GPIOx peripheral registers to their default reset values.
+  * @param  GPIOx where x can be (A..K) to select the GPIO peripheral for STM32F429X device or
+  *                      x can be (A..I) to select the GPIO peripheral for STM32F40XX and STM32F427X devices.
+  * @param  GPIO_Pin specifies the port bit to be written.
+  *          This parameter can be one of GPIO_PIN_x where x can be (0..15).
+  * @retval None
+  */
+void HAL_GPIO_DeInit(GPIO_TypeDef  *GPIOx, uint32_t GPIO_Pin)
+{
+  uint32_t position;
+  uint32_t ioposition = 0x00U;
+  uint32_t iocurrent = 0x00U;
+  uint32_t tmp = 0x00U;
+
+  /* Check the parameters */
+  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
+  
+  /* Configure the port pins */
+  for(position = 0U; position < GPIO_NUMBER; position++)
+  {
+    /* Get the IO position */
+    ioposition = 0x01U << position;
+    /* Get the current IO position */
+    iocurrent = (GPIO_Pin) & ioposition;
+
+    if(iocurrent == ioposition)
+    {
+      /*------------------------- EXTI Mode Configuration --------------------*/
+      tmp = SYSCFG->EXTICR[position >> 2U];
+      tmp &= (0x0FU << (4U * (position & 0x03U)));
+      if(tmp == ((uint32_t)(GPIO_GET_INDEX(GPIOx)) << (4U * (position & 0x03U))))
+      {
+        /* Clear EXTI line configuration */
+        EXTI->IMR &= ~((uint32_t)iocurrent);
+        EXTI->EMR &= ~((uint32_t)iocurrent);
+        
+        /* Clear Rising Falling edge configuration */
+        EXTI->FTSR &= ~((uint32_t)iocurrent);
+        EXTI->RTSR &= ~((uint32_t)iocurrent);
+
+        /* Configure the External Interrupt or event for the current IO */
+        tmp = 0x0FU << (4U * (position & 0x03U));
+        SYSCFG->EXTICR[position >> 2U] &= ~tmp;
+      }
+
+      /*------------------------- GPIO Mode Configuration --------------------*/
+      /* Configure IO Direction in Input Floating Mode */
+      GPIOx->MODER &= ~(GPIO_MODER_MODER0 << (position * 2U));
+
+      /* Configure the default Alternate Function in current IO */
+      GPIOx->AFR[position >> 3U] &= ~(0xFU << ((uint32_t)(position & 0x07U) * 4U)) ;
+
+      /* Deactivate the Pull-up and Pull-down resistor for the current IO */
+      GPIOx->PUPDR &= ~(GPIO_PUPDR_PUPDR0 << (position * 2U));
+
+      /* Configure the default value IO Output Type */
+      GPIOx->OTYPER  &= ~(GPIO_OTYPER_OT_0 << position) ;
+
+      /* Configure the default value for IO Speed */
+      GPIOx->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR0 << (position * 2U));
+    }
+  }
+}
+```
+
+### 8.1.3 HAL_GPIO_ReadPin()
+
+```c
+/**
+  * @brief  Reads the specified input port pin.
+  * @param  GPIOx where x can be (A..K) to select the GPIO peripheral for STM32F429X device or
+  *                      x can be (A..I) to select the GPIO peripheral for STM32F40XX and STM32F427X devices.
+  * @param  GPIO_Pin specifies the port bit to read.
+  *         This parameter can be GPIO_PIN_x where x can be (0..15).
+  * @retval The input port pin value.
+  */
+GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+  GPIO_PinState bitstatus;
+
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+
+  if((GPIOx->IDR & GPIO_Pin) != (uint32_t)GPIO_PIN_RESET)
+  {
+    bitstatus = GPIO_PIN_SET;
+  }
+  else
+  {
+    bitstatus = GPIO_PIN_RESET;
+  }
+  return bitstatus;
+}
+
+```
+
+### 8.1.4 HAL_GPIO_WritePin()
+
+```c
+/**
+  * @brief  Sets or clears the selected data port bit.
+  *
+  * @note   This function uses GPIOx_BSRR register to allow atomic read/modify
+  *         accesses. In this way, there is no risk of an IRQ occurring between
+  *         the read and the modify access.
+  *
+  * @param  GPIOx where x can be (A..K) to select the GPIO peripheral for STM32F429X device or
+  *                      x can be (A..I) to select the GPIO peripheral for STM32F40XX and STM32F427X devices.
+  * @param  GPIO_Pin specifies the port bit to be written.
+  *          This parameter can be one of GPIO_PIN_x where x can be (0..15).
+  * @param  PinState specifies the value to be written to the selected bit.
+  *          This parameter can be one of the GPIO_PinState enum values:
+  *            @arg GPIO_PIN_RESET: to clear the port pin
+  *            @arg GPIO_PIN_SET: to set the port pin
+  * @retval None
+  */
+void HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
+{
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  assert_param(IS_GPIO_PIN_ACTION(PinState));
+
+  if(PinState != GPIO_PIN_RESET)
+  {
+    GPIOx->BSRR = GPIO_Pin;
+  }
+  else
+  {
+    GPIOx->BSRR = (uint32_t)GPIO_Pin << 16U;
+  }
+}
+```
+
+### 8.1.5 HAL_GPIO_TogglePin()
+
+```c
+/**
+  * @brief  Toggles the specified GPIO pins.
+  * @param  GPIOx Where x can be (A..K) to select the GPIO peripheral for STM32F429X device or
+  *                      x can be (A..I) to select the GPIO peripheral for STM32F40XX and STM32F427X devices.
+  * @param  GPIO_Pin Specifies the pins to be toggled.
+  * @retval None
+  */
+void HAL_GPIO_TogglePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+  uint32_t odr;
+
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+
+  /* get current Output Data Register value */
+  odr = GPIOx->ODR;
+
+  /* Set selected pins that were at low level, and reset ones that were high */
+  GPIOx->BSRR = ((odr & GPIO_Pin) << GPIO_NUMBER) | (~odr & GPIO_Pin);
+}
+```
+
+### 8.1.6 HAL_GPIO_LockPin()
+
+```c
+/**
+  * @brief  Locks GPIO Pins configuration registers.
+  * @note   The locked registers are GPIOx_MODER, GPIOx_OTYPER, GPIOx_OSPEEDR,
+  *         GPIOx_PUPDR, GPIOx_AFRL and GPIOx_AFRH.
+  * @note   The configuration of the locked GPIO pins can no longer be modified
+  *         until the next reset.
+  * @param  GPIOx where x can be (A..F) to select the GPIO peripheral for STM32F4 family
+  * @param  GPIO_Pin specifies the port bit to be locked.
+  *         This parameter can be any combination of GPIO_PIN_x where x can be (0..15).
+  * @retval None
+  */
+HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+  __IO uint32_t tmp = GPIO_LCKR_LCKK;
+
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+
+  /* Apply lock key write sequence */
+  tmp |= GPIO_Pin;
+  /* Set LCKx bit(s): LCKK='1' + LCK[15-0] */
+  GPIOx->LCKR = tmp;
+  /* Reset LCKx bit(s): LCKK='0' + LCK[15-0] */
+  GPIOx->LCKR = GPIO_Pin;
+  /* Set LCKx bit(s): LCKK='1' + LCK[15-0] */
+  GPIOx->LCKR = tmp;
+  /* Read LCKR register. This read is mandatory to complete key lock sequence */
+  tmp = GPIOx->LCKR;
+
+  /* Read again in order to confirm lock is active */
+ if((GPIOx->LCKR & GPIO_LCKR_LCKK) != RESET)
+  {
+    return HAL_OK;
+  }
+  else
+  {
+    return HAL_ERROR;
+  }
+}
+```
+
+此函数用于锁住 GPIO 引脚所涉及到的寄存器，这些寄存器包括 GPIOx_MODER，GPIOx_OTYPER，GPIOx_OSPEEDR，GPIOx_PUPDR，GPIOx_AFRL 和 GPIOx_AFRH。
+
+### 8.1.7 HAL_GPIO_EXTI_IRQHandler
+
+```c
+/**
+  * @brief  This function handles EXTI interrupt request.
+  * @param  GPIO_Pin Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_IRQHandler(uint16_t GPIO_Pin)
+{
+  /* EXTI line interrupt detected */
+  if(__HAL_GPIO_EXTI_GET_IT(GPIO_Pin) != RESET)
+  {
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
+    HAL_GPIO_EXTI_Callback(GPIO_Pin);
+  }
+}
+```
+
+### 8.1.8 HAL_GPIO_EXTI_Callback()
+
+```c
+/**
+  * @brief  EXTI line detection callbacks.
+  * @param  GPIO_Pin Specifies the pins connected EXTI line
+  * @retval None
+  */
+__weak void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(GPIO_Pin);
+  /* NOTE: This function Should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+   */
+}
+```
+
+## 8.2 使用步骤
+
+1. 使能 GPIO 所在总线的 AHB 时钟，__HAL_RCC_GPIOx_CLK_ENABLE()
+2. 通过函数 HAL_GPIO_Init()配置 GPIO
+   1. 结构体 GPIO_InitTypeDef 的成员 Mode 配置输入、输出、模拟等模式
+   2. 结构体 GPIO_InitTypeDef 的成员 Pull 配置上拉、下拉电阻
+   3. 结构体 GPIO_InitTypeDef 的成员 Speed 配置 GPIO 速度等级
+   4. 选择了复用模式，那么就需要配置结构体 GPIO_InitTypeDef 的成员 Alternate
+   5. 引脚功能用于 ADC、DAC 的话，需要配置引脚为模拟模式
+   6. 用于外部中断/事件，结构体 GPIO_InitTypeDef 的成员 Mode 可以配置相应模式，相应的上升沿、下降沿或者双沿触发也可以选择
+3. 配置了外部中断/事件，可以通过函数 HAL_NVIC_SetPriority 设置优先级，然后调用函数 HAL_NVIC_EnableIRQ 使能此中断
+4. 输入模式读取引脚状态可以使用函数 HAL_GPIO_ReadPin
+5. 输出模式设置引脚状态可以调用函数 HAL_GPIO_WritePin()和 HAL_GPIO_TogglePin
+
+**注意事项**
+
+- 系统上电复位后，GPIO 默认是模拟模式，除了 JTAG 相关引脚
+- 关闭 LSE 的话，用到的两个引脚 OSC32_IN 和 OSC32_OUT（分别是 PC14，PC15）可以用在通用IO，如果开启了，就不能再做 GPIO
+- 关闭 HSE 的话，用到的两个引脚 OSC_IN 和 OSC_OUT（分别是 PH0，PH1）可以用在通用 IO，如果开启了，就不能再做 GPIO
+
+# 9.驱动LED
+
+## 9.1 灌电流驱动方式
+
+拉电流和灌电流时，STM32F407 单个引脚最大可可达 25mA
+
+## 9.2 LED的压降和驱动电流
+
+- 直插超亮发光二极管压降
+
+  - 红色发光二极管的压降为 2.0V-2.2V
+  -  黄色发光二极管的压降为 1.8V-2.0V
+  - 绿色发光二极管的压降为 3.0V-3.2V
+  - 正常发光时的额定电流约为 20mA
+
+- 贴片 LED 压降
+
+  - 红色的压降为 1.82-1.88V，电流 5-8mA
+  - 绿色的压降为 1.75-1.82V，电流 3-5mA
+  - 橙色的压降为 1.7-1.8V，电流 3-5mA
+  - 蓝色的压降为 3.1-3.3V，电流 8-10mA
+  - 白色的压降为 3-3.2V，电流 10-15mA
+
+  正负极区分:贴片 LED，会发现一端有绿点，有绿点的这端是负极，而另一端就是正极
+
+  
+
