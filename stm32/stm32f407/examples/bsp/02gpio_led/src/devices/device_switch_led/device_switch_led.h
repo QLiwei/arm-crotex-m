@@ -22,20 +22,20 @@ extern "C" {
 #define DEVICE_LED3
 
 #define LED1_CONFIG     {                           \
-                            GPIOA,                  \
-                            GPIO_PIN_0,              \
+                            GPIOE,                  \
+                            GPIO_PIN_3,              \
                             0,                      \
                         },                          \
 
 #define LED2_CONFIG     {                           \
-                            GPIOA,                  \
-                            GPIO_PIN_1,              \
+                            GPIOE,                  \
+                            GPIO_PIN_4,              \
                             0,                      \
                         },                          \
 
 #define LED3_CONFIG     {                           \
-                            GPIOA,                  \
-                            GPIO_PIN_2,              \
+                            GPIOG,                  \
+                            GPIO_PIN_9,              \
                             0,                      \
                         },                          \
 
