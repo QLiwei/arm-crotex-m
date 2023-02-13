@@ -51,6 +51,7 @@ extern switch_led_device_t g_switch_led_devs[];
 
 void switch_led_on(switch_led_device_t *dev);
 void switch_led_off(switch_led_device_t *dev);
+void switch_led_toggle(switch_led_device_t *dev);
 
 #ifdef __cplusplus
 }

@@ -13,6 +13,7 @@
 
 #include "base.h"
 #include "device_switch_led.h"
+#include "device_key.h"
 
 #ifdef __cplusplus
 extern "C" {

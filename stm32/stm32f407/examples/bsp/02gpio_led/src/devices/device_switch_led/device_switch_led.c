@@ -36,6 +36,10 @@ void switch_led_off(switch_led_device_t *dev)
     dev->state = 0;
 }
 
+void switch_led_toggle(switch_led_device_t *dev) {
+    HAL_GPIO_TogglePin(dev->gpiox, dev->gpio_pin);
+}
+
 void switch_led_gpio_init(switch_led_device_t *dev)
 {
     GPIO_InitTypeDef gpio_init_struct;
