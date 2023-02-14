@@ -19,7 +19,7 @@ typedef struct {
 }x_gpio_t;
 
 static const x_gpio_t s_gpio_list[] = {
-    {GPIOF, GPIO_PIN_6},
+    {GPIOG, GPIO_PIN_7},
 };
 
 static void device_beep_hard_init(const x_gpio_t *dev);
