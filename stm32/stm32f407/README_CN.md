@@ -3594,3 +3594,331 @@ __weak void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
   
 
+# 10.蜂鸣器
+
+## 10.1 分类
+
+蜂鸣器主要有**电磁式和电压式**两种，而且都有**无源蜂鸣器和有源蜂鸣器**两类。
+
+有源和无源的区别：
+
+- 有源蜂鸣器内部自带振荡器，给个电压就能发声，频率是固定的，只能发出一种声音
+- 无源蜂鸣器频率可控，给个方波才可以发声，并且根据不同频率发出不同的声音效果
+- 有源蜂鸣器工作的理想信号是直流电，通常标示为VDC、VDD等。因为蜂鸣器内部有一简单的振荡电路，能将恒定的直流电转化成一定频率的脉冲信号，从面实出磁场交变，带动钼片振动发音。但是在某些有源蜂鸣器在特定的交流信号下也可以工作，只是对交流信号的电压和频率要求很高，此种工作方式一般不采用。
+- 无源蜂鸣器没有内部驱动电路，有些公司和工厂称为讯响器，国标中称为声响器。无源蜂鸣器工作的理想信号方波。如果给予直流信号蜂鸣器是不响应的，因为磁路恒定，钼片不能振动发音
+
+**电磁式蜂鸣器**：电磁式蜂鸣器是利用电磁线圈对蜂鸣片的作用来发声
+
+**压电蜂鸣器：**压电蜂鸣器主要由多谐振荡器，压电蜂鸣片，阻抗匹配器及共鸣箱，外壳等组成。多谐振荡器由晶体管或集成电路构成，当接通电源后(1.5~15V直流工作电压)，多谐振荡器起振，输出1.5～2.5kHZ的音频信号，阻抗匹配器推动压电蜂鸣片发声。
+
+# 11.NVIC中断分组和配置
+
+NVIC 的全称是 Nested vectored interrupt controller，即嵌套向量中断控制器
+
+个中断的优先级都是用寄存器中的 8 位来设置的。8 位的话就可以设置 2^8 = 256 级中断，芯片厂商根据自己生产的芯片做出了调整，把后几位拉低。ST 的 STM32F1xx，F4xx 和 H7 只使用了这个 8 位中的高四位[7:4]，低四位取零，这样 2^4=16，只能表示 16 级中断嵌套
+
+优先级分组、抢占优先级和子优先级
+
+| 优先级分组           | 抢占优先级 | 子优先级 |
+| -------------------- | ---------- | -------- |
+| NVIC_PriorityGroup_0 | 0          | 0-15     |
+| NVIC_PriorityGroup_1 | 0-1        | 0-7      |
+| NVIC_PriorityGroup_2 | 0-3        | 0-3      |
+| NVIC_PriorityGroup_3 | 0-7        | 0-1      |
+| NVIC_PriorityGroup_4 | 0-15       | 0        |
+
+- 说高抢占式优先级的中断可以抢占低抢占式优先级的中断的执行
+- 抢占式优先级相同的情况，高子优先级的中断优先被响应
+- 在抢占式优先级相同的情况下，如果有低子优先级中断正在执行，高子优先级的中断要等待已被响应的低子优先级中断执行结束后才能得到响应，即子优先级不支持中断嵌套
+- Reset、NMI、Hard Fault 优先级为负数，高于普通中断优先级，且优先级不可配置
+- 系统中断（比如：PendSV，SVC，SysTick）是不是一定比外部中断（比如 SPI,USART）要高。答案：不是的，它们是在同一个 NVIC 下面设置的
+
+## 11.1 HAL API
+
+### 11.1.1 HAL_NVIC_SetPriorityGrouping
+
+```c
+/**
+  * @brief  Sets the priority grouping field (preemption priority and subpriority)
+  *         using the required unlock sequence.
+  * @param  PriorityGroup The priority grouping bits length. 
+  *         This parameter can be one of the following values:
+  *         @arg NVIC_PRIORITYGROUP_0: 0 bits for preemption priority
+  *                                    4 bits for subpriority
+  *         @arg NVIC_PRIORITYGROUP_1: 1 bits for preemption priority
+  *                                    3 bits for subpriority
+  *         @arg NVIC_PRIORITYGROUP_2: 2 bits for preemption priority
+  *                                    2 bits for subpriority
+  *         @arg NVIC_PRIORITYGROUP_3: 3 bits for preemption priority
+  *                                    1 bits for subpriority
+  *         @arg NVIC_PRIORITYGROUP_4: 4 bits for preemption priority
+  *                                    0 bits for subpriority
+  * @note   When the NVIC_PriorityGroup_0 is selected, IRQ preemption is no more possible. 
+  *         The pending IRQ priority will be managed only by the subpriority. 
+  * @retval None
+  */
+void HAL_NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+{
+  /* Check the parameters */
+  assert_param(IS_NVIC_PRIORITY_GROUP(PriorityGroup));
+  
+  /* Set the PRIGROUP[10:8] bits according to the PriorityGroup parameter value */
+  NVIC_SetPriorityGrouping(PriorityGroup);
+}
+```
+
+### 11.1.2 HAL_NVIC_SetPriority
+
+```c
+/**
+  * @brief  Sets the priority of an interrupt.
+  * @param  IRQn External interrupt number.
+  *         This parameter can be an enumerator of IRQn_Type enumeration
+  *         (For the complete STM32 Devices IRQ Channels list, please refer to the appropriate CMSIS device file (stm32f4xxxx.h))
+  * @param  PreemptPriority The preemption priority for the IRQn channel.
+  *         This parameter can be a value between 0 and 15
+  *         A lower priority value indicates a higher priority 
+  * @param  SubPriority the subpriority level for the IRQ channel.
+  *         This parameter can be a value between 0 and 15
+  *         A lower priority value indicates a higher priority.          
+  * @retval None
+  */
+void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority)
+{ 
+  uint32_t prioritygroup = 0x00U;
+  
+  /* Check the parameters */
+  assert_param(IS_NVIC_SUB_PRIORITY(SubPriority));
+  assert_param(IS_NVIC_PREEMPTION_PRIORITY(PreemptPriority));
+  
+  prioritygroup = NVIC_GetPriorityGrouping();
+  
+  NVIC_SetPriority(IRQn, NVIC_EncodePriority(prioritygroup, PreemptPriority, SubPriority));
+}
+```
+
+### 11.1.3 HAL_NVIC_EnableIRQ
+
+```c
+/**
+  * @brief  Enables a device specific interrupt in the NVIC interrupt controller.
+  * @note   To configure interrupts priority correctly, the NVIC_PriorityGroupConfig()
+  *         function should be called before. 
+  * @param  IRQn External interrupt number.
+  *         This parameter can be an enumerator of IRQn_Type enumeration
+  *         (For the complete STM32 Devices IRQ Channels list, please refer to the appropriate CMSIS device file (stm32f4xxxx.h))
+  * @retval None
+  */
+void HAL_NVIC_EnableIRQ(IRQn_Type IRQn)
+{
+  /* Check the parameters */
+  assert_param(IS_NVIC_DEVICE_IRQ(IRQn));
+  
+  /* Enable interrupt */
+  NVIC_EnableIRQ(IRQn);
+}
+```
+
+### 11.1.4 HAL_NVIC_DisableIRQ
+
+```c
+/**
+  * @brief  Disables a device specific interrupt in the NVIC interrupt controller.
+  * @param  IRQn External interrupt number.
+  *         This parameter can be an enumerator of IRQn_Type enumeration
+  *         (For the complete STM32 Devices IRQ Channels list, please refer to the appropriate CMSIS device file (stm32f4xxxx.h))
+  * @retval None
+  */
+void HAL_NVIC_DisableIRQ(IRQn_Type IRQn)
+{
+  /* Check the parameters */
+  assert_param(IS_NVIC_DEVICE_IRQ(IRQn));
+  
+  /* Disable interrupt */
+  NVIC_DisableIRQ(IRQn);
+}
+```
+
+### 11.1.5 HAL_NVIC_SystemReset
+
+```c
+/**
+  * @brief  Initiates a system reset request to reset the MCU.
+  * @retval None
+  */
+void HAL_NVIC_SystemReset(void)
+{
+  /* System Reset */
+  NVIC_SystemReset();
+}
+```
+
+### 11.1.6 IRQn_Type (stm32f407.h)
+
+```c
+/**
+ * @brief STM32F4XX Interrupt Number Definition, according to the selected device 
+ *        in @ref Library_configuration_section 
+ */
+typedef enum
+{
+/******  Cortex-M4 Processor Exceptions Numbers ****************************************************************/
+  NonMaskableInt_IRQn         = -14,    /*!< 2 Non Maskable Interrupt                                          */
+  MemoryManagement_IRQn       = -12,    /*!< 4 Cortex-M4 Memory Management Interrupt                           */
+  BusFault_IRQn               = -11,    /*!< 5 Cortex-M4 Bus Fault Interrupt                                   */
+  UsageFault_IRQn             = -10,    /*!< 6 Cortex-M4 Usage Fault Interrupt                                 */
+  SVCall_IRQn                 = -5,     /*!< 11 Cortex-M4 SV Call Interrupt                                    */
+  DebugMonitor_IRQn           = -4,     /*!< 12 Cortex-M4 Debug Monitor Interrupt                              */
+  PendSV_IRQn                 = -2,     /*!< 14 Cortex-M4 Pend SV Interrupt                                    */
+  SysTick_IRQn                = -1,     /*!< 15 Cortex-M4 System Tick Interrupt                                */
+/******  STM32 specific Interrupt Numbers **********************************************************************/
+  WWDG_IRQn                   = 0,      /*!< Window WatchDog Interrupt                                         */
+  PVD_IRQn                    = 1,      /*!< PVD through EXTI Line detection Interrupt                         */
+  TAMP_STAMP_IRQn             = 2,      /*!< Tamper and TimeStamp interrupts through the EXTI line             */
+  RTC_WKUP_IRQn               = 3,      /*!< RTC Wakeup interrupt through the EXTI line                        */
+  FLASH_IRQn                  = 4,      /*!< FLASH global Interrupt                                            */
+  RCC_IRQn                    = 5,      /*!< RCC global Interrupt                                              */
+  EXTI0_IRQn                  = 6,      /*!< EXTI Line0 Interrupt                                              */
+  EXTI1_IRQn                  = 7,      /*!< EXTI Line1 Interrupt                                              */
+  EXTI2_IRQn                  = 8,      /*!< EXTI Line2 Interrupt                                              */
+  EXTI3_IRQn                  = 9,      /*!< EXTI Line3 Interrupt                                              */
+  EXTI4_IRQn                  = 10,     /*!< EXTI Line4 Interrupt                                              */
+  DMA1_Stream0_IRQn           = 11,     /*!< DMA1 Stream 0 global Interrupt                                    */
+  DMA1_Stream1_IRQn           = 12,     /*!< DMA1 Stream 1 global Interrupt                                    */
+  DMA1_Stream2_IRQn           = 13,     /*!< DMA1 Stream 2 global Interrupt                                    */
+  DMA1_Stream3_IRQn           = 14,     /*!< DMA1 Stream 3 global Interrupt                                    */
+  DMA1_Stream4_IRQn           = 15,     /*!< DMA1 Stream 4 global Interrupt                                    */
+  DMA1_Stream5_IRQn           = 16,     /*!< DMA1 Stream 5 global Interrupt                                    */
+  DMA1_Stream6_IRQn           = 17,     /*!< DMA1 Stream 6 global Interrupt                                    */
+  ADC_IRQn                    = 18,     /*!< ADC1, ADC2 and ADC3 global Interrupts                             */
+  CAN1_TX_IRQn                = 19,     /*!< CAN1 TX Interrupt                                                 */
+  CAN1_RX0_IRQn               = 20,     /*!< CAN1 RX0 Interrupt                                                */
+  CAN1_RX1_IRQn               = 21,     /*!< CAN1 RX1 Interrupt                                                */
+  CAN1_SCE_IRQn               = 22,     /*!< CAN1 SCE Interrupt                                                */
+  EXTI9_5_IRQn                = 23,     /*!< External Line[9:5] Interrupts                                     */
+  TIM1_BRK_TIM9_IRQn          = 24,     /*!< TIM1 Break interrupt and TIM9 global interrupt                    */
+  TIM1_UP_TIM10_IRQn          = 25,     /*!< TIM1 Update Interrupt and TIM10 global interrupt                  */
+  TIM1_TRG_COM_TIM11_IRQn     = 26,     /*!< TIM1 Trigger and Commutation Interrupt and TIM11 global interrupt */
+  TIM1_CC_IRQn                = 27,     /*!< TIM1 Capture Compare Interrupt                                    */
+  TIM2_IRQn                   = 28,     /*!< TIM2 global Interrupt                                             */
+  TIM3_IRQn                   = 29,     /*!< TIM3 global Interrupt                                             */
+  TIM4_IRQn                   = 30,     /*!< TIM4 global Interrupt                                             */
+  I2C1_EV_IRQn                = 31,     /*!< I2C1 Event Interrupt                                              */
+  I2C1_ER_IRQn                = 32,     /*!< I2C1 Error Interrupt                                              */
+  I2C2_EV_IRQn                = 33,     /*!< I2C2 Event Interrupt                                              */
+  I2C2_ER_IRQn                = 34,     /*!< I2C2 Error Interrupt                                              */
+  SPI1_IRQn                   = 35,     /*!< SPI1 global Interrupt                                             */
+  SPI2_IRQn                   = 36,     /*!< SPI2 global Interrupt                                             */
+  USART1_IRQn                 = 37,     /*!< USART1 global Interrupt                                           */
+  USART2_IRQn                 = 38,     /*!< USART2 global Interrupt                                           */
+  USART3_IRQn                 = 39,     /*!< USART3 global Interrupt                                           */
+  EXTI15_10_IRQn              = 40,     /*!< External Line[15:10] Interrupts                                   */
+  RTC_Alarm_IRQn              = 41,     /*!< RTC Alarm (A and B) through EXTI Line Interrupt                   */
+  OTG_FS_WKUP_IRQn            = 42,     /*!< USB OTG FS Wakeup through EXTI line interrupt                     */
+  TIM8_BRK_TIM12_IRQn         = 43,     /*!< TIM8 Break Interrupt and TIM12 global interrupt                   */
+  TIM8_UP_TIM13_IRQn          = 44,     /*!< TIM8 Update Interrupt and TIM13 global interrupt                  */
+  TIM8_TRG_COM_TIM14_IRQn     = 45,     /*!< TIM8 Trigger and Commutation Interrupt and TIM14 global interrupt */
+  TIM8_CC_IRQn                = 46,     /*!< TIM8 Capture Compare global interrupt                             */
+  DMA1_Stream7_IRQn           = 47,     /*!< DMA1 Stream7 Interrupt                                            */
+  FSMC_IRQn                   = 48,     /*!< FSMC global Interrupt                                             */
+  SDIO_IRQn                   = 49,     /*!< SDIO global Interrupt                                             */
+  TIM5_IRQn                   = 50,     /*!< TIM5 global Interrupt                                             */
+  SPI3_IRQn                   = 51,     /*!< SPI3 global Interrupt                                             */
+  UART4_IRQn                  = 52,     /*!< UART4 global Interrupt                                            */
+  UART5_IRQn                  = 53,     /*!< UART5 global Interrupt                                            */
+  TIM6_DAC_IRQn               = 54,     /*!< TIM6 global and DAC1&2 underrun error  interrupts                 */
+  TIM7_IRQn                   = 55,     /*!< TIM7 global interrupt                                             */
+  DMA2_Stream0_IRQn           = 56,     /*!< DMA2 Stream 0 global Interrupt                                    */
+  DMA2_Stream1_IRQn           = 57,     /*!< DMA2 Stream 1 global Interrupt                                    */
+  DMA2_Stream2_IRQn           = 58,     /*!< DMA2 Stream 2 global Interrupt                                    */
+  DMA2_Stream3_IRQn           = 59,     /*!< DMA2 Stream 3 global Interrupt                                    */
+  DMA2_Stream4_IRQn           = 60,     /*!< DMA2 Stream 4 global Interrupt                                    */
+  ETH_IRQn                    = 61,     /*!< Ethernet global Interrupt                                         */
+  ETH_WKUP_IRQn               = 62,     /*!< Ethernet Wakeup through EXTI line Interrupt                       */
+  CAN2_TX_IRQn                = 63,     /*!< CAN2 TX Interrupt                                                 */
+  CAN2_RX0_IRQn               = 64,     /*!< CAN2 RX0 Interrupt                                                */
+  CAN2_RX1_IRQn               = 65,     /*!< CAN2 RX1 Interrupt                                                */
+  CAN2_SCE_IRQn               = 66,     /*!< CAN2 SCE Interrupt                                                */
+  OTG_FS_IRQn                 = 67,     /*!< USB OTG FS global Interrupt                                       */
+  DMA2_Stream5_IRQn           = 68,     /*!< DMA2 Stream 5 global interrupt                                    */
+  DMA2_Stream6_IRQn           = 69,     /*!< DMA2 Stream 6 global interrupt                                    */
+  DMA2_Stream7_IRQn           = 70,     /*!< DMA2 Stream 7 global interrupt                                    */
+  USART6_IRQn                 = 71,     /*!< USART6 global interrupt                                           */
+  I2C3_EV_IRQn                = 72,     /*!< I2C3 event interrupt                                              */
+  I2C3_ER_IRQn                = 73,     /*!< I2C3 error interrupt                                              */
+  OTG_HS_EP1_OUT_IRQn         = 74,     /*!< USB OTG HS End Point 1 Out global interrupt                       */
+  OTG_HS_EP1_IN_IRQn          = 75,     /*!< USB OTG HS End Point 1 In global interrupt                        */
+  OTG_HS_WKUP_IRQn            = 76,     /*!< USB OTG HS Wakeup through EXTI interrupt                          */
+  OTG_HS_IRQn                 = 77,     /*!< USB OTG HS global interrupt                                       */
+  DCMI_IRQn                   = 78,     /*!< DCMI global interrupt                                             */
+  RNG_IRQn                    = 80,     /*!< RNG global Interrupt                                              */
+  FPU_IRQn                    = 81      /*!< FPU global interrupt                                               */
+} IRQn_Type;
+```
+
+## 11.2 开关中断
+
+__set_PRIMASK 就是对寄存器 primask 做的开关设置，如下表所示：
+
+**primask**:这是个只有 1 个 bit 的寄存器。 在它被置 1 后，就关掉所有可屏蔽的异常，只剩下NMI 和硬 fault 可以响应。它的缺省值是 0，表示没有关中断。
+
+**faultmask**:这是个只有 1 个 bit 的寄存器。当它置 1 时，只有 NMI 才能响应，所有其它的异常，甚至是硬 fault，也通通闭嘴。它的缺省值也是 0，表示没有关异常。
+
+**basepri** :这个寄存器最多有 9 位（由表达优先级的位数决定）。它定义了被屏蔽优先级的阈值。当它被设成某个值后，所有优先级号大于等于此值的中断都被关（优先级号越大，优先级越低）。但若被设成 0，则不关闭任何中断， 0 也是缺省值。
+
+对于寄存器 basepri 我们举一个例子，帮助大家理解。比我们配置寄存器 basepri（对于 STM32F407，范围 0-255）的数值为 16，所有优先级数值大于等于 16 的中断都会被关闭，优先级数值小于 16 的中断不会被关闭。但 0 比较特殊，对寄存器 basepri 寄存器赋值 0，那么被关闭的中断会被打开。
+
+```c
+#define ENABLE_INT() __set_PRIMASK(0) /* 使能全局中断 */
+#define DISABLE_INT() __set_PRIMASK(1) /* 禁止全局中断 */
+```
+
+# 12 Systick
+
+- Systick 是 Cortex-M4 内核自带的组件，其它几个常用的硬件异常 HardFault，SVC 和 PendSV 也都是是内核自带的，其中 Systick，SVC 和 PendSV 的中断优先级是可编程的，跟 SPI 中断、ADC 中断、UART 中断等一样，都在同一个 NVIC 下配置的。而 HardFault 是不可编程的，且优先级要比可编程的都要高。
+- Systick 是一个 24 位的递减计数器，用户仅需掌握 ARM 的 CMSIS 软件提供的一个函数SysTick_Config 即可，原代码如下：
+
+**core.cm4.h**
+
+```c
+#if defined (__Vendor_SysTickConfig) && (__Vendor_SysTickConfig == 0U)
+
+/**
+  \brief   System Tick Configuration
+  \details Initializes the System Timer and its interrupt, and starts the System Tick Timer.
+           Counter is in free running mode to generate periodic interrupts.
+  \param [in]  ticks  Number of ticks between two interrupts.
+  \return          0  Function succeeded.
+  \return          1  Function failed.
+  \note    When the variable <b>__Vendor_SysTickConfig</b> is set to 1, then the
+           function <b>SysTick_Config</b> is not included. In this case, the file <b><i>device</i>.h</b>
+           must contain a vendor-specific implementation of this function.
+ */
+__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
+{
+  if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk)
+  {
+    return (1UL);                                                   /* Reload value impossible */
+  }
+
+  SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
+  NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Interrupt */
+  SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
+  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+                   SysTick_CTRL_TICKINT_Msk   |
+                   SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
+  return (0UL);                                                     /* Function successful */
+}
+
+#endif
+```
+
+- 参数ticks：函数的形参用于配置滴答定时器 LOAD 寄存器的数值，由于滴答定时器是一个递减计数器，启动后是将 LOAD 寄存器的数值赋给 VAL 寄存器，然后 VAL 寄存器做递减操作，等递减到 0 的时候重新加载 LOAD 寄存器的数值继续做递减操作
+  - 函数的形参表示内核时钟多少个周期后触发一次 Systick 定时中断
+  - \- SystemCoreClock / 1000 表示定时频率为 1000Hz， 也就是定时周期为 1ms。
+  - \- SystemCoreClock / 500 表示定时频率为 500Hz， 也就是定时周期为 2ms。
+  - \- SystemCoreClock / 2000 表示定时频率为 2000Hz，也就是定时周期为 500us。
+  - SystemCoreClock 是 STM32F407 的系统主频 168MHz。
+- NVIC_SetPriority 设置滴答定时器为最低优先级
+- 配置滴答定时器的控制寄存器，使能滴答定时器中断。滴答定时器的中断服务程序实现比较简单，没有清除中断标志这样的操作，仅需填写用户要实现的功能
+
