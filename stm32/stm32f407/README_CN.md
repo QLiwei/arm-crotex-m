@@ -3922,3 +3922,486 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
 - NVIC_SetPriority 设置滴答定时器为最低优先级
 - 配置滴答定时器的控制寄存器，使能滴答定时器中断。滴答定时器的中断服务程序实现比较简单，没有清除中断标志这样的操作，仅需填写用户要实现的功能
 
+# 13.USART
+
+## 13.1 硬件框图
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230215-110911.png)
+
+- TX RX接口，分别用于数据的发送和接受
+- SW_RX接口，智能卡模式，用此接口接收数据
+- IRAD_OUT IRAD_IN 接口 IRAD模式数据接受和发送
+- RST CTS 硬件流控
+- USART_BRR 波特率生成单元
+- 发送过程：
+  - USART_TDR -> TxFIFO -> Tx Shift Reg -> Tx | RX
+- 接受过程：
+  - TX | RX -> Rx Shift Reg -> RxFIFO -> USART_RDR
+
+## 13.2 USART 的基本功能
+
+### 13.2.1 STM32 USART特性
+
+- 可配置为 16 倍过采样或 8 倍过采样，因而为速度容差与时钟容差的灵活配置提供了可能
+- 小数波特率发生器系统
+  - 通用可编程收发波特率（有关最大 APB 频率时的波特率值，请参见数据手册）。
+- 数据字长度可编程（8 位或 9 位）
+- LIN 主模式同步停止符号发送功能和 LIN 从模式停止符号检测功能
+  - 对 USART 进行 LIN 硬件配置时可生成 13 位停止符号和检测 10/11 位停止符号
+- 用于同步发送的发送器时钟输出
+- IrDA SIR 编码解码器
+  -  正常模式下，支持 3/16 位持续时间
+- 智能卡仿真功能
+  - 智能卡接口支持符合 ISO 7816-3 标准中定义的异步协议智能卡
+  - 智能卡工作模式下，支持 0.5 或 1.5 个停止位
+- 单线半双工通信
+- 使用 DMA（直接存储器访问）实现可配置的多缓冲区通信
+  - 使用 DMA 在预留的 SRAM 缓冲区中收/发字节
+- 发送器和接收器具有单独使能位
+- 传输检测标志：
+  - 接收缓冲区已满
+  - 发送缓冲区为空
+  - 传输结束标志
+
+### 13.2.2  **USART feature comparison**
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230215-113857.png)
+
+### 13.2.3 USART字符说明
+
+- USART_CR1 寄存器中的 M 位进行编程来选择 8 位或 9 位的字长
+- TX 引脚在起始位工作期间处于低电平状态。在停止位工作期间处于高电平状态
+- **空闲字符**可理解为整个帧周期内电平均为“1”（停止位的电平也是“1”），该字符后是下一个数据帧的起始位。
+- **停止字符**可理解为在一个帧周期内接收到的电平均为“0”。发送器在中断帧的末尾插入 1 或 2 个停止位（逻辑“1”位）以确认起始位。
+- 发送和接收由通用波特率发生器驱动，发送器和接收器的使能位分别置 1 时将生成相应的发 送时钟和接收时钟。
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230215-114314.png)
+
+### 13.2.4 发送时序
+
+- 始终通过向数据寄存器写入数据来将 TXE 位清零
+- TXE 位由硬件置 1，它表示：
+  - 数据已从 TDR 移到移位寄存器中且数据发送已开始。
+  - TDR 寄存器为空。
+  - USART_DR 寄存器中可写入下一个数据，而不会覆盖前一个数据。
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230215-114734.png)
+
+## 13.3 串口的HAL库用法
+
+### 13.3.1 结构体USART_TypeDef
+
+core_m4.h
+
+```c
+#define __O volatile /*!< Defines 'write only' permissions */
+#define __IO volatile /*!< Defines 'read / write' permissions */
+```
+
+stm32f407xx.h
+
+```c
+/** 
+  * @brief Universal Synchronous Asynchronous Receiver Transmitter
+  */
+ 
+typedef struct
+{
+  __IO uint32_t SR;         /*!< USART Status register,                   Address offset: 0x00 */
+  __IO uint32_t DR;         /*!< USART Data register,                     Address offset: 0x04 */
+  __IO uint32_t BRR;        /*!< USART Baud rate register,                Address offset: 0x08 */
+  __IO uint32_t CR1;        /*!< USART Control register 1,                Address offset: 0x0C */
+  __IO uint32_t CR2;        /*!< USART Control register 2,                Address offset: 0x10 */
+  __IO uint32_t CR3;        /*!< USART Control register 3,                Address offset: 0x14 */
+  __IO uint32_t GTPR;       /*!< USART Guard time and prescaler register, Address offset: 0x18 */
+} USART_TypeDef;
+
+```
+
+stm32f407xx.h
+
+```c
+/*!< Peripheral memory map */
+#define APB1PERIPH_BASE       PERIPH_BASE
+#define APB2PERIPH_BASE       (PERIPH_BASE + 0x00010000UL)
+#define AHB1PERIPH_BASE       (PERIPH_BASE + 0x00020000UL)
+#define AHB2PERIPH_BASE       (PERIPH_BASE + 0x10000000UL)
+
+#define USART1_BASE           (APB2PERIPH_BASE + 0x1000UL)
+#define USART6_BASE           (APB2PERIPH_BASE + 0x1400UL)
+
+#define USART2_BASE           (APB1PERIPH_BASE + 0x4400UL)
+#define USART3_BASE           (APB1PERIPH_BASE + 0x4800UL)
+#define UART4_BASE            (APB1PERIPH_BASE + 0x4C00UL)
+#define UART5_BASE            (APB1PERIPH_BASE + 0x5000UL)
+
+#define USART2              ((USART_TypeDef *) USART2_BASE)
+#define USART3              ((USART_TypeDef *) USART3_BASE)
+#define UART4               ((USART_TypeDef *) UART4_BASE)
+#define UART5               ((USART_TypeDef *) UART5_BASE)
+
+#define USART1              ((USART_TypeDef *) USART1_BASE)
+#define USART6              ((USART_TypeDef *) USART6_BASE)
+```
+
+### 13.3.2 结构体 UART_HandleTypeDef
+
+```c
+/**
+  * @brief  UART handle Structure definition
+  */
+typedef struct __UART_HandleTypeDef
+{
+  USART_TypeDef                 *Instance;        /*!< UART registers base address        */
+
+  UART_InitTypeDef              Init;             /*!< UART communication parameters      */
+
+  const uint8_t                 *pTxBuffPtr;      /*!< Pointer to UART Tx transfer Buffer */
+
+  uint16_t                      TxXferSize;       /*!< UART Tx Transfer size              */
+
+  __IO uint16_t                 TxXferCount;      /*!< UART Tx Transfer Counter           */
+
+  uint8_t                       *pRxBuffPtr;      /*!< Pointer to UART Rx transfer Buffer */
+
+  uint16_t                      RxXferSize;       /*!< UART Rx Transfer size              */
+
+  __IO uint16_t                 RxXferCount;      /*!< UART Rx Transfer Counter           */
+
+  __IO HAL_UART_RxTypeTypeDef ReceptionType;      /*!< Type of ongoing reception          */
+
+  DMA_HandleTypeDef             *hdmatx;          /*!< UART Tx DMA Handle parameters      */
+
+  DMA_HandleTypeDef             *hdmarx;          /*!< UART Rx DMA Handle parameters      */
+
+  HAL_LockTypeDef               Lock;             /*!< Locking object                     */
+
+  __IO HAL_UART_StateTypeDef    gState;           /*!< UART state information related to global Handle management
+                                                       and also related to Tx operations.
+                                                       This parameter can be a value of @ref HAL_UART_StateTypeDef */
+
+  __IO HAL_UART_StateTypeDef    RxState;          /*!< UART state information related to Rx operations.
+                                                       This parameter can be a value of @ref HAL_UART_StateTypeDef */
+
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+
+#if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
+  void (* TxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);        /*!< UART Tx Half Complete Callback        */
+  void (* TxCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Tx Complete Callback             */
+  void (* RxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);        /*!< UART Rx Half Complete Callback        */
+  void (* RxCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Complete Callback             */
+  void (* ErrorCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Error Callback                   */
+  void (* AbortCpltCallback)(struct __UART_HandleTypeDef *huart);         /*!< UART Abort Complete Callback          */
+  void (* AbortTransmitCpltCallback)(struct __UART_HandleTypeDef *huart); /*!< UART Abort Transmit Complete Callback */
+  void (* AbortReceiveCpltCallback)(struct __UART_HandleTypeDef *huart);  /*!< UART Abort Receive Complete Callback  */
+  void (* WakeupCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Wakeup Callback                  */
+  void (* RxEventCallback)(struct __UART_HandleTypeDef *huart, uint16_t Pos); /*!< UART Reception Event Callback     */
+
+  void (* MspInitCallback)(struct __UART_HandleTypeDef *huart);           /*!< UART Msp Init callback                */
+  void (* MspDeInitCallback)(struct __UART_HandleTypeDef *huart);         /*!< UART Msp DeInit callback              */
+#endif  /* USE_HAL_UART_REGISTER_CALLBACKS */
+
+} UART_HandleTypeDef;
+```
+
+- USART_TypeDef *Instance 这个参数是寄存器的例化，方便操作寄存器
+- UART_InitTypeDef Init 配置串口的基本参数
+- 条件编译 USE_HAL_UART_REGISTER_CALLBACKS
+  - 用于串口回调函数的设置。
+  - 如果要用到这种回调函数定义方式，可以在 stm32f4xx_hal_conf.h 文件里面使能
+
+### 13.3.3 串口底层配置（GPIO 时钟 中断）
+
+- 配置 GPIO 引脚时钟。
+- 配置 USART 时钟。
+-  配置 USART 的发送和接收引脚。
+-  通过 NVIC 配置中断。
+-  配置波特率，奇偶校验。
+-  清除 TC 和 RXNE 标志，使能接收中断。
+
+
+
+- 串口发送和接收引脚的复用模式选择已经被 HAL 库定义好，放在了 stm32f4xx_hal_gpio_ex.h
+- 根据情况要清除 TC 发送完成标志和 RXNE 接收数据标志，因为这两个标志位在使能了串口后就已经置位，所以当用户使用了 TC 或者 RX 中断后，就会进入一次中断服务程序，这点要特别注意。
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230215-145350.png)
+
+__HAL_USART_GET_FLAG
+
+```c
+/** @brief  Check whether the specified USART flag is set or not.
+  * @param  __HANDLE__ specifies the USART Handle.
+  *         USART Handle selects the USARTx peripheral (USART availability and x value depending on device).
+  * @param  __FLAG__ specifies the flag to check.
+  *        This parameter can be one of the following values:
+  *            @arg USART_FLAG_TXE:  Transmit data register empty flag
+  *            @arg USART_FLAG_TC:   Transmission Complete flag
+  *            @arg USART_FLAG_RXNE: Receive data register not empty flag
+  *            @arg USART_FLAG_IDLE: Idle Line detection flag
+  *            @arg USART_FLAG_ORE:  Overrun Error flag
+  *            @arg USART_FLAG_NE:   Noise Error flag
+  *            @arg USART_FLAG_FE:   Framing Error flag
+  *            @arg USART_FLAG_PE:   Parity Error flag
+  * @retval The new state of __FLAG__ (TRUE or FALSE).
+  */
+#define __HAL_USART_GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->Instance->SR & (__FLAG__)) == (__FLAG__))
+
+/** @brief  Checks whether the specified UART flag is set or not.
+  * @param  __HANDLE__ specifies the UART Handle.
+  *         UART Handle selects the USARTx or UARTy peripheral
+  *         (USART,UART availability and x,y values depending on device).
+  * @param  __FLAG__ specifies the flag to check.
+  *        This parameter can be one of the following values:
+  *            @arg UART_FLAG_CTS:  CTS Change flag (not available for UART4 and UART5)
+  *            @arg UART_FLAG_LBD:  LIN Break detection flag
+  *            @arg UART_FLAG_TXE:  Transmit data register empty flag
+  *            @arg UART_FLAG_TC:   Transmission Complete flag
+  *            @arg UART_FLAG_RXNE: Receive data register not empty flag
+  *            @arg UART_FLAG_IDLE: Idle Line detection flag
+  *            @arg UART_FLAG_ORE:  Overrun Error flag
+  *            @arg UART_FLAG_NE:   Noise Error flag
+  *            @arg UART_FLAG_FE:   Framing Error flag
+  *            @arg UART_FLAG_PE:   Parity Error flag
+  * @retval The new state of __FLAG__ (TRUE or FALSE).
+  */
+#define __HAL_UART_GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->Instance->SR & (__FLAG__)) == (__FLAG__))
+
+
+```
+
+__HAL_USART_ENABLE_IT
+
+```
+/** @brief  Enables or disables the specified USART interrupts.
+  * @param  __HANDLE__ specifies the USART Handle.
+  *         USART Handle selects the USARTx peripheral (USART availability and x value depending on device).
+  * @param  __INTERRUPT__ specifies the USART interrupt source to check.
+  *          This parameter can be one of the following values:
+  *            @arg USART_IT_TXE:  Transmit Data Register empty interrupt
+  *            @arg USART_IT_TC:   Transmission complete interrupt
+  *            @arg USART_IT_RXNE: Receive Data register not empty interrupt
+  *            @arg USART_IT_IDLE: Idle line detection interrupt
+  *            @arg USART_IT_PE:   Parity Error interrupt
+  *            @arg USART_IT_ERR:  Error interrupt(Frame error, noise error, overrun error)
+  * @retval None
+  */
+#define __HAL_USART_ENABLE_IT(__HANDLE__, __INTERRUPT__)   ((((__INTERRUPT__) >> 28U) == USART_CR1_REG_INDEX)? ((__HANDLE__)->Instance->CR1 |= ((__INTERRUPT__) & USART_IT_MASK)): \
+ 
+```
+
+### 13.3.4 串口初始化流程
+
+1. 定义 UART_HandleTypeDef 类型串口结构体变量，比如 UART_HandleTypeDef huart
+2. 使用函数 HAL_UART_MspInit 初始化串口底层，不限制一定要用此函数里面初始化，用户也可以自己实现
+   1. 使能串口时钟
+   2. 引脚配置
+      1. 使能串口所使用的 GPIO 时钟
+      2. 配置 GPIO 的复用模式
+   3. 如果使用中断方式函数 HAL_UART_Transmit_IT 和 HAL_UART_Receive_IT 需要做如下配置
+      1. 配置串口中断优先级
+      2. 使能串口中断
+   4. 串口中断的开关是通过函数__HAL_UART_ENABLE_IT() 和 __HAL_UART_DISABLE_IT()来实现这两个函数被嵌套到串口的发送和接收函数中调用
+   5. 如果使用 DMA 方式函数 HAL_UART_Transmit_DMA 和 HAL_UART_Receive_DMA 需要做如下配置。
+      1. 声明串口的发送和接收 DMA 结构体变量，注意发送和接收是独立的，如果都使用，那就都需要配置
+      2. 使能 DMA 接口时钟。
+      3. 配置串口的发送和接收 DMA 结构体变量
+      4. 配置 DMA 发送和接收通道
+      5. 关联 DMA 和串口的句柄
+      6. 配置发送 DMA 和接收 DMA 的传输完成中断和中断优先级
+3. 配置串口的波特率，位长，停止位，奇偶校验位，流控制和发送接收模式
+4. 串口初始化调用的函数 HAL_UART_Init 初始化
+
+### 13.3.5 API
+
+- HAL_UART_Init
+- HAL_UART_Transmit
+- HAL_UART_Receive
+- HAL_UART_Transmit_IT
+- HAL_UART_Receive_IT
+- HAL_UART_Transmit_DMA
+- HAL_UART_Receive_DMA
+
+
+
+# 14.TIMx
+
+## 14.1硬件框图
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230216-153446.png)
+
+- TIMx_ETR接口：外部触发接口，ETR支持多种输入源：输入引脚、比较器输出和模拟看门狗
+- TIMx_CHx :输入捕获，计算频率、脉冲、计数
+- TIMx_BKIN:断路功能，用于保护TIM1和TIM8定时器产生的PWM信号所驱动的功率开关
+- TRGO：内部输出通道 定时器级联 ADC和DAC定时器触发
+- 输出比较 OCx
+- TIMx_CHx TIMx_CHxN PWM输出 1-3有互补输出 4没有
+
+## 14.2 时基单元
+
+- 预分频器寄存器（TIMx_PSC):用于设置定时器的分频
+  - 预分频器有个缓冲功能，可以让用户实时更改，新的预分频值将在下一个更新事件发生时被采用（以递增计数模式为例，就是 CNT 计数值达到 ARR 自动重装寄存器的数值时会产生更新事件）
+- 计数寄存器（TIMx_CNT):计数器是最基本的计数单元，计数值建立在分频的基础上
+- 自动重装载寄存器（TIMx_ARR)：自动重装载是CNT能达到的最大计数值，以递增计数器模式为例，CNT计数值达到ARR寄存器数值时，重新从0开始计数
+- 重复计数值寄存器（TIMx_RCR):以递增计数模式为例，当 CNT 计数器数值达到 ARR 自动重载数值时，重复计数器的数值加 1，重复次数达到 TIMx_RCR+ 1 后就，将生成更新事件
+
+## 14.3 输出比较（PWM)
+
+PWM 边沿对齐模式，递增计数配置为例
+
+- 当计数器 TIMx_CNT < 比较捕获寄存器 TIMx_CCRx 期间，PWM 参考信号 OCxREF 输出高电平
+- 当计数器 TIMx_CNT >= 比较捕获寄存器 TIMx_CCRx 期间，PWM 参考信号 OCxREF 输出低电平
+- 当比较捕获寄存器 TIMx_CCRx > 自动重载寄存器 TIMx_ARR，OCxREF 保持为 1。
+- 当比较捕获寄存器 TIMx_CCRx = 0，则 OCxRef 保持为 0。
+
+
+
+## 14.4 输入捕获
+
+配置定时器捕获方式：对输入的信号（上升沿，下降沿，双边沿）触发中断，TIMx_CCRx 保存当前计数值 （要考虑溢出处理）
+
+## 14.5 HAL库用法
+
+### 14.5.1 TIM_TypeDef
+
+```c
+/** 
+  * @brief TIM
+  */
+
+typedef struct
+{
+  __IO uint32_t CR1;         /*!< TIM control register 1,              Address offset: 0x00 */
+  __IO uint32_t CR2;         /*!< TIM control register 2,              Address offset: 0x04 */
+  __IO uint32_t SMCR;        /*!< TIM slave mode control register,     Address offset: 0x08 */
+  __IO uint32_t DIER;        /*!< TIM DMA/interrupt enable register,   Address offset: 0x0C */
+  __IO uint32_t SR;          /*!< TIM status register,                 Address offset: 0x10 */
+  __IO uint32_t EGR;         /*!< TIM event generation register,       Address offset: 0x14 */
+  __IO uint32_t CCMR1;       /*!< TIM capture/compare mode register 1, Address offset: 0x18 */
+  __IO uint32_t CCMR2;       /*!< TIM capture/compare mode register 2, Address offset: 0x1C */
+  __IO uint32_t CCER;        /*!< TIM capture/compare enable register, Address offset: 0x20 */
+  __IO uint32_t CNT;         /*!< TIM counter register,                Address offset: 0x24 */
+  __IO uint32_t PSC;         /*!< TIM prescaler,                       Address offset: 0x28 */
+  __IO uint32_t ARR;         /*!< TIM auto-reload register,            Address offset: 0x2C */
+  __IO uint32_t RCR;         /*!< TIM repetition counter register,     Address offset: 0x30 */
+  __IO uint32_t CCR1;        /*!< TIM capture/compare register 1,      Address offset: 0x34 */
+  __IO uint32_t CCR2;        /*!< TIM capture/compare register 2,      Address offset: 0x38 */
+  __IO uint32_t CCR3;        /*!< TIM capture/compare register 3,      Address offset: 0x3C */
+  __IO uint32_t CCR4;        /*!< TIM capture/compare register 4,      Address offset: 0x40 */
+  __IO uint32_t BDTR;        /*!< TIM break and dead-time register,    Address offset: 0x44 */
+  __IO uint32_t DCR;         /*!< TIM DMA control register,            Address offset: 0x48 */
+  __IO uint32_t DMAR;        /*!< TIM DMA address for full transfer,   Address offset: 0x4C */
+  __IO uint32_t OR;          /*!< TIM option register,                 Address offset: 0x50 */
+} TIM_TypeDef;
+```
+
+### 14.5.2 TIM_HandleTypeDef
+
+```c
+#if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)
+typedef struct __TIM_HandleTypeDef
+#else
+typedef struct
+#endif /* USE_HAL_TIM_REGISTER_CALLBACKS */
+{
+  TIM_TypeDef                        *Instance;         /*!< Register base address                             */
+  TIM_Base_InitTypeDef               Init;              /*!< TIM Time Base required parameters                 */
+  HAL_TIM_ActiveChannel              Channel;           /*!< Active channel                                    */
+  DMA_HandleTypeDef                  *hdma[7];          /*!< DMA Handlers array
+                                                             This array is accessed by a @ref DMA_Handle_index */
+  HAL_LockTypeDef                    Lock;              /*!< Locking object                                    */
+  __IO HAL_TIM_StateTypeDef          State;             /*!< TIM operation state                               */
+  __IO HAL_TIM_ChannelStateTypeDef   ChannelState[4];   /*!< TIM channel operation state                       */
+  __IO HAL_TIM_ChannelStateTypeDef   ChannelNState[4];  /*!< TIM complementary channel operation state         */
+  __IO HAL_TIM_DMABurstStateTypeDef  DMABurstState;     /*!< DMA burst operation state                         */
+
+#if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)
+  void (* Base_MspInitCallback)(struct __TIM_HandleTypeDef *htim);              /*!< TIM Base Msp Init Callback                              */
+  void (* Base_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);            /*!< TIM Base Msp DeInit Callback                            */
+  void (* IC_MspInitCallback)(struct __TIM_HandleTypeDef *htim);                /*!< TIM IC Msp Init Callback                                */
+  void (* IC_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);              /*!< TIM IC Msp DeInit Callback                              */
+  void (* OC_MspInitCallback)(struct __TIM_HandleTypeDef *htim);                /*!< TIM OC Msp Init Callback                                */
+  void (* OC_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);              /*!< TIM OC Msp DeInit Callback                              */
+  void (* PWM_MspInitCallback)(struct __TIM_HandleTypeDef *htim);               /*!< TIM PWM Msp Init Callback                               */
+  void (* PWM_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);             /*!< TIM PWM Msp DeInit Callback                             */
+  void (* OnePulse_MspInitCallback)(struct __TIM_HandleTypeDef *htim);          /*!< TIM One Pulse Msp Init Callback                         */
+  void (* OnePulse_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);        /*!< TIM One Pulse Msp DeInit Callback                       */
+  void (* Encoder_MspInitCallback)(struct __TIM_HandleTypeDef *htim);           /*!< TIM Encoder Msp Init Callback                           */
+  void (* Encoder_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);         /*!< TIM Encoder Msp DeInit Callback                         */
+  void (* HallSensor_MspInitCallback)(struct __TIM_HandleTypeDef *htim);        /*!< TIM Hall Sensor Msp Init Callback                       */
+  void (* HallSensor_MspDeInitCallback)(struct __TIM_HandleTypeDef *htim);      /*!< TIM Hall Sensor Msp DeInit Callback                     */
+  void (* PeriodElapsedCallback)(struct __TIM_HandleTypeDef *htim);             /*!< TIM Period Elapsed Callback                             */
+  void (* PeriodElapsedHalfCpltCallback)(struct __TIM_HandleTypeDef *htim);     /*!< TIM Period Elapsed half complete Callback               */
+  void (* TriggerCallback)(struct __TIM_HandleTypeDef *htim);                   /*!< TIM Trigger Callback                                    */
+  void (* TriggerHalfCpltCallback)(struct __TIM_HandleTypeDef *htim);           /*!< TIM Trigger half complete Callback                      */
+  void (* IC_CaptureCallback)(struct __TIM_HandleTypeDef *htim);                /*!< TIM Input Capture Callback                              */
+  void (* IC_CaptureHalfCpltCallback)(struct __TIM_HandleTypeDef *htim);        /*!< TIM Input Capture half complete Callback                */
+  void (* OC_DelayElapsedCallback)(struct __TIM_HandleTypeDef *htim);           /*!< TIM Output Compare Delay Elapsed Callback               */
+  void (* PWM_PulseFinishedCallback)(struct __TIM_HandleTypeDef *htim);         /*!< TIM PWM Pulse Finished Callback                         */
+  void (* PWM_PulseFinishedHalfCpltCallback)(struct __TIM_HandleTypeDef *htim); /*!< TIM PWM Pulse Finished half complete Callback           */
+  void (* ErrorCallback)(struct __TIM_HandleTypeDef *htim);                     /*!< TIM Error Callback                                      */
+  void (* CommutationCallback)(struct __TIM_HandleTypeDef *htim);               /*!< TIM Commutation Callback                                */
+  void (* CommutationHalfCpltCallback)(struct __TIM_HandleTypeDef *htim);       /*!< TIM Commutation half complete Callback                  */
+  void (* BreakCallback)(struct __TIM_HandleTypeDef *htim);                     /*!< TIM Break Callback                                      */
+#endif /* USE_HAL_TIM_REGISTER_CALLBACKS */
+} TIM_HandleTypeDef;
+```
+
+### 14.5.3 TIM_OC_InitTypeDef
+
+```c
+/**
+  * @brief  TIM Output Compare Configuration Structure definition
+  */
+typedef struct
+{
+  uint32_t OCMode;        /*!< Specifies the TIM mode.
+                               This parameter can be a value of @ref TIM_Output_Compare_and_PWM_modes */
+
+  uint32_t Pulse;         /*!< Specifies the pulse value to be loaded into the Capture Compare Register.
+                               This parameter can be a number between Min_Data = 0x0000 and Max_Data = 0xFFFF */
+
+  uint32_t OCPolarity;    /*!< Specifies the output polarity.
+                               This parameter can be a value of @ref TIM_Output_Compare_Polarity */
+
+  uint32_t OCNPolarity;   /*!< Specifies the complementary output polarity.
+                               This parameter can be a value of @ref TIM_Output_Compare_N_Polarity
+                               @note This parameter is valid only for timer instances supporting break feature. */
+
+  uint32_t OCFastMode;    /*!< Specifies the Fast mode state.
+                               This parameter can be a value of @ref TIM_Output_Fast_State
+                               @note This parameter is valid only in PWM1 and PWM2 mode. */
+
+
+  uint32_t OCIdleState;   /*!< Specifies the TIM Output Compare pin state during Idle state.
+                               This parameter can be a value of @ref TIM_Output_Compare_Idle_State
+                               @note This parameter is valid only for timer instances supporting break feature. */
+
+  uint32_t OCNIdleState;  /*!< Specifies the TIM Output Compare pin state during Idle state.
+                               This parameter can be a value of @ref TIM_Output_Compare_N_Idle_State
+                               @note This parameter is valid only for timer instances supporting break feature. */
+} TIM_OC_InitTypeDef;
+
+```
+
+### 14.5.4 TIM_IC_InitTypeDef
+
+```c
+/**
+  * @brief  TIM Input Capture Configuration Structure definition
+  */
+typedef struct
+{
+  uint32_t  ICPolarity;  /*!< Specifies the active edge of the input signal.
+                              This parameter can be a value of @ref TIM_Input_Capture_Polarity */
+
+  uint32_t ICSelection;  /*!< Specifies the input.
+                              This parameter can be a value of @ref TIM_Input_Capture_Selection */
+
+  uint32_t ICPrescaler;  /*!< Specifies the Input Capture Prescaler.
+                              This parameter can be a value of @ref TIM_Input_Capture_Prescaler */
+
+  uint32_t ICFilter;     /*!< Specifies the input capture filter.
+                              This parameter can be a number between Min_Data = 0x0 and Max_Data = 0xF */
+} TIM_IC_InitTypeDef;
+```
+
