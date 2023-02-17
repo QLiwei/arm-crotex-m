@@ -1,5 +1,11 @@
 # Update Record
 
+## 2023-02-17
+
+1. 添加串口驱动，使用HAL库API【】
+   1. HAL_UART_Receive_IT 不能接收不定长的数据，只有接收满了Size个字节才会进行中断（可用FIFO解决）
+   2. HAL_UART_Transmit_IT 它不能在执行完第一次发送之前进行下一次发送，否则下一次不会执行
+
 ## 2023-02-14
 
 1. 添加beep设备并测试
