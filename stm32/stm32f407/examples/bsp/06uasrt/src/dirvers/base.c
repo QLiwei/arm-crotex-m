@@ -146,7 +146,7 @@ void system_clock_config(void)
 	RCC_OscInitStruct.PLL.PLLQ = 4;
 	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	{
-        //Error_Handler(__FILE__, __LINE__);
+        Error_Handler(__FILE__, __LINE__);
 	}
 
 	/*
@@ -165,7 +165,7 @@ void system_clock_config(void)
 	/* 此函数会更新SystemCoreClock，并重新配置HAL_InitTick */
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
 	{
-        //Error_Handler(__FILE__, __LINE__);
+        Error_Handler(__FILE__, __LINE__);
 	}
 
     /* 使能SYS时钟和IO补偿 */
@@ -179,7 +179,7 @@ void system_clock_config(void)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
+void Error_Handler(char *file, uint32_t line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */

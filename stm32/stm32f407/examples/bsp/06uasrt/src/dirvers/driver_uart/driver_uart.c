@@ -26,7 +26,7 @@ static void driver_uart4_init(void) {
     huart4.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart4) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 
@@ -55,7 +55,7 @@ static void driver_uart5_init(void)
     huart5.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart5) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 
@@ -84,7 +84,7 @@ static void driver_usart1_init(void)
     huart1.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart1) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 
@@ -113,7 +113,7 @@ static void driver_usart2_init(void)
     huart2.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart2) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 
@@ -142,7 +142,7 @@ static void driver_uasrt3_init(void)
     huart3.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart3) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 
@@ -171,7 +171,7 @@ static void driver_usart6_init(void)
     huart6.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart6) != HAL_OK)
     {
-        Error_Handler();
+        Error_Handler(__FILE__, __LINE__);
     }
 }
 

@@ -422,9 +422,9 @@
               <FilePath>..\..\src\dirvers\base.c</FilePath>
             </File>
             <File>
-              <FileName>driver_uart.c</FileName>
+              <FileName>driver_uart_fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_uart\driver_uart.c</FilePath>
+              <FilePath>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>

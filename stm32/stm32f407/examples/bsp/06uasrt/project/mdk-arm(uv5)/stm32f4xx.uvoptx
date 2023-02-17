@@ -315,8 +315,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\src\dirvers\driver_uart\driver_uart.c</PathWithFileName>
-      <FilenameWithoutPath>driver_uart.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</PathWithFileName>
+      <FilenameWithoutPath>driver_uart_fifo.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

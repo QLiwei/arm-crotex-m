@@ -26,7 +26,7 @@ void systick_isr(void);
 void delay_us(uint32_t n);
 void system_clock_config(void);
 uint32_t get_system_uptime(void);
-void Error_Handler(void);
+void Error_Handler(char *file, uint32_t line);
 
 #ifdef __cplusplus
 }
