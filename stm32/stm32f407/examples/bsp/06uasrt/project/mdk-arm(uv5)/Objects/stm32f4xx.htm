@@ -3,11 +3,11 @@
 <title>Static Call Graph - [.\Objects\stm32f4xx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\stm32f4xx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Fri Feb 17 15:15:00 2023
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Mar 01 23:08:27 2023
 <BR><P>
-<H3>Maximum Stack Usage =        256 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        264 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-uart_fifo_driver_init &rArr; driver_uart_init &rArr; HAL_UART_Init &rArr; HAL_UART_MspInit &rArr; HAL_NVIC_SetPriority &rArr; __NVIC_SetPriority
+uart_fifo_driver_init &rArr; driver_uart_init &rArr; HAL_UART_Init &rArr; UART_SetConfig &rArr; __aeabi_uldivmod
 <P>
 <H3>
 Mutually Recursive functions
@@ -130,7 +130,7 @@ Global Symbols
 <P><STRONG><a name="[5d]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry.o(.ARM.Collect$$$$00000000))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(.text)
 </UL>
-<P><STRONG><a name="[a9]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
+<P><STRONG><a name="[ad]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
 
 <P><STRONG><a name="[69]"></a>_main_scatterload</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry5.o(.ARM.Collect$$$$00000004))
 <BR><BR>[Calls]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
@@ -140,17 +140,17 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
 </UL>
 
-<P><STRONG><a name="[aa]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
+<P><STRONG><a name="[ae]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
 
-<P><STRONG><a name="[ab]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
+<P><STRONG><a name="[af]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
 
-<P><STRONG><a name="[ac]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
+<P><STRONG><a name="[b0]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
 
-<P><STRONG><a name="[ad]"></a>__rt_lib_shutdown_fini</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry12b.o(.ARM.Collect$$$$0000000E))
+<P><STRONG><a name="[b1]"></a>__rt_lib_shutdown_fini</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry12b.o(.ARM.Collect$$$$0000000E))
 
-<P><STRONG><a name="[ae]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000F))
+<P><STRONG><a name="[b2]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000F))
 
-<P><STRONG><a name="[af]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$00000011))
+<P><STRONG><a name="[b3]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$00000011))
 
 <P><STRONG><a name="[0]"></a>Reset_Handler</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, startup_stm32f407xx.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
@@ -394,22 +394,22 @@ Global Symbols
 <LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
 </UL>
 
-<P><STRONG><a name="[b0]"></a>__aeabi_memcpy</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
+<P><STRONG><a name="[b4]"></a>__aeabi_memcpy</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
 
-<P><STRONG><a name="[a8]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
+<P><STRONG><a name="[ab]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_fifo_driver_init
 </UL>
 
-<P><STRONG><a name="[b1]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
+<P><STRONG><a name="[b5]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text), UNUSED)
 
 <P><STRONG><a name="[6f]"></a>__aeabi_memset</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 <BR><BR>[Called By]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_memset$wrapper
 <LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 
-<P><STRONG><a name="[b2]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[b6]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
-<P><STRONG><a name="[b3]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[b7]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[6e]"></a>__aeabi_memclr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -419,7 +419,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 </UL>
 
-<P><STRONG><a name="[b4]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[b8]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[70]"></a>_memset$wrapper</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, memseta.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -429,13 +429,13 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
-<P><STRONG><a name="[b5]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
+<P><STRONG><a name="[b9]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
 
 <P><STRONG><a name="[6c]"></a>__aeabi_llsr</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, llushr.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
 
-<P><STRONG><a name="[b6]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
+<P><STRONG><a name="[ba]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
 
 <P><STRONG><a name="[6a]"></a>__scatterload</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, init.o(.text))
 <BR><BR>[Calls]<UL><LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main_after_scatterload
@@ -443,11 +443,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_main_scatterload
 </UL>
 
-<P><STRONG><a name="[b7]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
+<P><STRONG><a name="[bb]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
-<P><STRONG><a name="[b8]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[bc]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
-<P><STRONG><a name="[b9]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[bd]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
 <P><STRONG><a name="[4]"></a>BusFault_Handler</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.BusFault_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
@@ -455,13 +455,14 @@ Global Symbols
 <P><STRONG><a name="[7]"></a>DebugMon_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.DebugMon_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[96]"></a>Error_Handler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, base.o(i.Error_Handler))
-<BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
-<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
+<P><STRONG><a name="[8d]"></a>Error_Handler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, base.o(i.Error_Handler))
+<BR><BR>[Called By]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;com2fifo_uart
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
 </UL>
 
-<P><STRONG><a name="[a3]"></a>HAL_EnableCompensationCell</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_EnableCompensationCell))
-<BR><BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
+<P><STRONG><a name="[a6]"></a>HAL_EnableCompensationCell</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_EnableCompensationCell))
+<BR><BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
 </UL>
 
 <P><STRONG><a name="[85]"></a>HAL_GPIO_Init</STRONG> (Thumb, 454 bytes, Stack size 24 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_Init))
@@ -469,21 +470,21 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_hard_init
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_hard_init
-<LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
+<LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_hard_init
+<LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
 </UL>
 
-<P><STRONG><a name="[a2]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
+<P><STRONG><a name="[a5]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = HAL_GPIO_TogglePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_toggle
+<BR>[Called By]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_toggle
 </UL>
 
-<P><STRONG><a name="[90]"></a>HAL_GPIO_WritePin</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin))
-<BR><BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_on
-<LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
+<P><STRONG><a name="[94]"></a>HAL_GPIO_WritePin</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin))
+<BR><BR>[Called By]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
+<LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
+<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_on
+<LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
 </UL>
 
 <P><STRONG><a name="[7b]"></a>HAL_GetTick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_GetTick))
@@ -544,7 +545,7 @@ Global Symbols
 <LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
+<BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
 </UL>
 
 <P><STRONG><a name="[7e]"></a>HAL_RCC_GetHCLKFreq</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal_rcc.o(i.HAL_RCC_GetHCLKFreq))
@@ -581,7 +582,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
+<BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
 </UL>
 
 <P><STRONG><a name="[76]"></a>HAL_SYSTICK_Config</STRONG> (Thumb, 52 bytes, Stack size 16 bytes, stm32f4xx_hal_cortex.o(i.HAL_SYSTICK_Config))
@@ -593,21 +594,21 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[81]"></a>HAL_UART_Init</STRONG> (Thumb, 114 bytes, Stack size 8 bytes, stm32f4xx_hal_uart.o(i.HAL_UART_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_Init &rArr; HAL_UART_MspInit &rArr; HAL_NVIC_SetPriority &rArr; __NVIC_SetPriority
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_Init &rArr; UART_SetConfig &rArr; __aeabi_uldivmod
 </UL>
-<BR>[Calls]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
+<BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_MspInit
 </UL>
-<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
+<BR>[Called By]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
 </UL>
 
 <P><STRONG><a name="[82]"></a>HAL_UART_MspInit</STRONG> (Thumb, 818 bytes, Stack size 32 bytes, driver_uart_fifo.o(i.HAL_UART_MspInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = HAL_UART_MspInit &rArr; HAL_NVIC_SetPriority &rArr; __NVIC_SetPriority
 </UL>
-<BR>[Calls]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
+<BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Init
 </UL>
@@ -684,11 +685,11 @@ Global Symbols
 <P><STRONG><a name="[5]"></a>UsageFault_Handler</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.UsageFault_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[ba]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
+<P><STRONG><a name="[be]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
 
-<P><STRONG><a name="[bb]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
+<P><STRONG><a name="[bf]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
 
-<P><STRONG><a name="[bc]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
+<P><STRONG><a name="[c0]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
 <P><STRONG><a name="[67]"></a>beep_device_init</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, device_beep.o(i.beep_device_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = beep_device_init &rArr; device_beep_hard_init &rArr; HAL_GPIO_Init
@@ -697,96 +698,106 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> device_beep.o(.comm_i_fn.3)
 </UL>
-<P><STRONG><a name="[a4]"></a>comm_board_init</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, comm_init.o(i.comm_board_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = comm_board_init
+<P><STRONG><a name="[8e]"></a>com_send_buf</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, driver_uart_fifo.o(i.com_send_buf))
+<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = com_send_buf &rArr; uart_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
+<BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_send
+<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;com2fifo_uart
+</UL>
+<BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[a5]"></a>comm_components_init</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, comm_init.o(i.comm_components_init))
+<P><STRONG><a name="[a7]"></a>comm_board_init</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, comm_init.o(i.comm_board_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = comm_board_init
+</UL>
+<BR>[Called By]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
+</UL>
+
+<P><STRONG><a name="[a8]"></a>comm_components_init</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, comm_init.o(i.comm_components_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = comm_components_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
+<BR>[Called By]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
 </UL>
 
 <P><STRONG><a name="[5f]"></a>device_beep_handle</STRONG> (Thumb, 348 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_handle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = device_beep_handle &rArr; device_beep_on
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
-<LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
+<BR>[Calls]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
+<LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
 </UL>
-<P><STRONG><a name="[8e]"></a>device_beep_key_tone</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_key_tone))
+<P><STRONG><a name="[92]"></a>device_beep_key_tone</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_key_tone))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = device_beep_key_tone &rArr; device_beep_start &rArr; device_beep_on
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
+<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
 </UL>
 <BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[8f]"></a>device_beep_start</STRONG> (Thumb, 118 bytes, Stack size 24 bytes, device_beep.o(i.device_beep_start))
+<P><STRONG><a name="[93]"></a>device_beep_start</STRONG> (Thumb, 118 bytes, Stack size 24 bytes, device_beep.o(i.device_beep_start))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = device_beep_start &rArr; device_beep_on
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
+<BR>[Calls]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_on
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_key_tone
+<BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_key_tone
 <LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[99]"></a>device_get_key</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, device_key.o(i.device_get_key))
+<P><STRONG><a name="[9c]"></a>device_get_key</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, device_key.o(i.device_get_key))
 <BR><BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
 <P><STRONG><a name="[5e]"></a>device_key_scan_10ms</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, device_key.o(i.device_key_scan_10ms))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = device_key_scan_10ms &rArr; device_detect_key &rArr; is_key_down_func
 </UL>
-<BR>[Calls]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
+<BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
 </UL>
-<P><STRONG><a name="[93]"></a>device_put_key</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, device_key.o(i.device_put_key))
-<BR><BR>[Called By]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
+<P><STRONG><a name="[97]"></a>device_put_key</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, device_key.o(i.device_put_key))
+<BR><BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
 </UL>
 
 <P><STRONG><a name="[66]"></a>key_device_init</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, device_key.o(i.key_device_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = key_device_init &rArr; device_key_hard_init &rArr; HAL_GPIO_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_value_init
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_hard_init
+<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_value_init
+<LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_hard_init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> device_key.o(.comm_i_fn.3)
 </UL>
-<P><STRONG><a name="[60]"></a>key_handle</STRONG> (Thumb, 158 bytes, Stack size 8 bytes, main.o(i.key_handle))
-<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = key_handle &rArr; device_beep_key_tone &rArr; device_beep_start &rArr; device_beep_on
+<P><STRONG><a name="[60]"></a>key_handle</STRONG> (Thumb, 168 bytes, Stack size 8 bytes, main.o(i.key_handle))
+<BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = key_handle &rArr; com_send_buf &rArr; uart_send
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_toggle
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_on
-<LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
-<LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_get_key
-<LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
-<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_key_tone
+<BR>[Calls]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_toggle
+<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_on
+<LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_get_key
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_key_tone
+<LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;com_send_buf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(i.main)
 </UL>
 <P><STRONG><a name="[5b]"></a>main</STRONG> (Thumb, 62 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = main &rArr; system_clock_config &rArr; HAL_RCC_ClockConfig &rArr; HAL_RCC_GetSysClockFreq &rArr; __aeabi_uldivmod
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
-<LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
-<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_timer_set
-<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_timer_run
+<BR>[Calls]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_init
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;system_clock_config
+<LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_timer_set
+<LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;soft_timer_run
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[a0]"></a>soft_timer_run</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, soft_timer.o(i.soft_timer_run))
+<P><STRONG><a name="[a3]"></a>soft_timer_run</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, soft_timer.o(i.soft_timer_run))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = soft_timer_run
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[9f]"></a>soft_timer_set</STRONG> (Thumb, 78 bytes, Stack size 12 bytes, soft_timer.o(i.soft_timer_set))
+<P><STRONG><a name="[a2]"></a>soft_timer_set</STRONG> (Thumb, 78 bytes, Stack size 12 bytes, soft_timer.o(i.soft_timer_set))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = soft_timer_set
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -799,60 +810,60 @@ Global Symbols
 <P><STRONG><a name="[65]"></a>switch_led_device_init</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_device_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = switch_led_device_init &rArr; switch_led_gpio_init &rArr; HAL_GPIO_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
+<BR>[Calls]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> device_switch_led.o(.comm_i_fn.3)
 </UL>
-<P><STRONG><a name="[a1]"></a>switch_led_gpio_init</STRONG> (Thumb, 400 bytes, Stack size 32 bytes, device_switch_led.o(i.switch_led_gpio_init))
+<P><STRONG><a name="[a4]"></a>switch_led_gpio_init</STRONG> (Thumb, 400 bytes, Stack size 32 bytes, device_switch_led.o(i.switch_led_gpio_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = switch_led_gpio_init &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
-<LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
+<LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_off
 </UL>
 <BR>[Called By]<UL><LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_device_init
 </UL>
 
-<P><STRONG><a name="[9b]"></a>switch_led_off</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_off))
+<P><STRONG><a name="[9e]"></a>switch_led_off</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_off))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = switch_led_off
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
+<BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;switch_led_gpio_init
 <LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[9a]"></a>switch_led_on</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_on))
+<P><STRONG><a name="[9d]"></a>switch_led_on</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_on))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = switch_led_on
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
 <BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[9c]"></a>switch_led_toggle</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_toggle))
+<P><STRONG><a name="[9f]"></a>switch_led_toggle</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, device_switch_led.o(i.switch_led_toggle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = switch_led_toggle &rArr; HAL_GPIO_TogglePin
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
+<BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 </UL>
 <BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_handle
 </UL>
 
-<P><STRONG><a name="[9d]"></a>system_clock_config</STRONG> (Thumb, 204 bytes, Stack size 80 bytes, base.o(i.system_clock_config))
+<P><STRONG><a name="[a0]"></a>system_clock_config</STRONG> (Thumb, 204 bytes, Stack size 80 bytes, base.o(i.system_clock_config))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = system_clock_config &rArr; HAL_RCC_ClockConfig &rArr; HAL_RCC_GetSysClockFreq &rArr; __aeabi_uldivmod
 </UL>
 <BR>[Calls]<UL><LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_OscConfig
 <LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_ClockConfig
-<LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_EnableCompensationCell
-<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_EnableCompensationCell
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[9e]"></a>system_init</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, comm_init.o(i.system_init))
+<P><STRONG><a name="[a1]"></a>system_init</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, comm_init.o(i.system_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = system_init &rArr; comm_components_init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;comm_components_init
-<LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;comm_board_init
+<BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;comm_components_init
+<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;comm_board_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -860,33 +871,33 @@ Global Symbols
 <P><STRONG><a name="[89]"></a>systick_isr</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, base.o(i.systick_isr))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = systick_isr
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_per_1ms
-<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_per_10ms
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_per_1ms
+<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;run_per_10ms
 </UL>
 <BR>[Called By]<UL><LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
 </UL>
 
-<P><STRONG><a name="[63]"></a>uart_fifo_driver_init</STRONG> (Thumb, 622 bytes, Stack size 80 bytes, driver_uart_fifo.o(i.uart_fifo_driver_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = uart_fifo_driver_init &rArr; driver_uart_init &rArr; HAL_UART_Init &rArr; HAL_UART_MspInit &rArr; HAL_NVIC_SetPriority &rArr; __NVIC_SetPriority
+<P><STRONG><a name="[63]"></a>uart_fifo_driver_init</STRONG> (Thumb, 658 bytes, Stack size 80 bytes, driver_uart_fifo.o(i.uart_fifo_driver_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 264<LI>Call Chain = uart_fifo_driver_init &rArr; driver_uart_init &rArr; HAL_UART_Init &rArr; UART_SetConfig &rArr; __aeabi_uldivmod
 </UL>
-<BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
-<LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<BR>[Calls]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;driver_uart_init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> driver_uart_fifo.o(.comm_i_fn.1)
 </UL><P>
 <H3>
 Local Symbols
 </H3>
-<P><STRONG><a name="[91]"></a>device_detect_key</STRONG> (Thumb, 200 bytes, Stack size 16 bytes, device_key.o(i.device_detect_key))
+<P><STRONG><a name="[95]"></a>device_detect_key</STRONG> (Thumb, 200 bytes, Stack size 16 bytes, device_key.o(i.device_detect_key))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = device_detect_key &rArr; is_key_down_func
 </UL>
-<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_put_key
-<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_key_down_func
+<BR>[Calls]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_put_key
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_key_down_func
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_key_scan_10ms
 </UL>
 
-<P><STRONG><a name="[94]"></a>device_key_hard_init</STRONG> (Thumb, 394 bytes, Stack size 32 bytes, device_key.o(i.device_key_hard_init))
+<P><STRONG><a name="[98]"></a>device_key_hard_init</STRONG> (Thumb, 394 bytes, Stack size 32 bytes, device_key.o(i.device_key_hard_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = device_key_hard_init &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
@@ -894,67 +905,79 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_device_init
 </UL>
 
-<P><STRONG><a name="[98]"></a>device_key_value_init</STRONG> (Thumb, 70 bytes, Stack size 0 bytes, device_key.o(i.device_key_value_init))
+<P><STRONG><a name="[9b]"></a>device_key_value_init</STRONG> (Thumb, 70 bytes, Stack size 0 bytes, device_key.o(i.device_key_value_init))
 <BR><BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_device_init
 </UL>
 
-<P><STRONG><a name="[92]"></a>is_key_down_func</STRONG> (Thumb, 62 bytes, Stack size 24 bytes, device_key.o(i.is_key_down_func))
+<P><STRONG><a name="[96]"></a>is_key_down_func</STRONG> (Thumb, 62 bytes, Stack size 24 bytes, device_key.o(i.is_key_down_func))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = is_key_down_func
 </UL>
-<BR>[Calls]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_pin_active
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_pin_active
 </UL>
-<BR>[Called By]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
+<BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_detect_key
 </UL>
 
-<P><STRONG><a name="[97]"></a>key_pin_active</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, device_key.o(i.key_pin_active))
-<BR><BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_key_down_func
+<P><STRONG><a name="[9a]"></a>key_pin_active</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, device_key.o(i.key_pin_active))
+<BR><BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;is_key_down_func
 </UL>
 
 <P><STRONG><a name="[8b]"></a>device_beep_hard_init</STRONG> (Thumb, 400 bytes, Stack size 32 bytes, device_beep.o(i.device_beep_hard_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = device_beep_hard_init &rArr; HAL_GPIO_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
+<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_off
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;beep_device_init
 </UL>
 
-<P><STRONG><a name="[8c]"></a>device_beep_off</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_off))
+<P><STRONG><a name="[90]"></a>device_beep_off</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_off))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = device_beep_off
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_hard_init
 <LI><a href="#[5f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_handle
 </UL>
 
-<P><STRONG><a name="[8d]"></a>device_beep_on</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_on))
+<P><STRONG><a name="[91]"></a>device_beep_on</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, device_beep.o(i.device_beep_on))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = device_beep_on
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
+<BR>[Called By]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_start
 <LI><a href="#[5f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;device_beep_handle
 </UL>
 
-<P><STRONG><a name="[a7]"></a>run_per_10ms</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, base.o(i.run_per_10ms))
+<P><STRONG><a name="[aa]"></a>run_per_10ms</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, base.o(i.run_per_10ms))
 <BR><BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;systick_isr
 </UL>
 
-<P><STRONG><a name="[a6]"></a>run_per_1ms</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, base.o(i.run_per_1ms))
+<P><STRONG><a name="[a9]"></a>run_per_1ms</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, base.o(i.run_per_1ms))
 <BR><BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;systick_isr
 </UL>
 
-<P><STRONG><a name="[95]"></a>driver_uart_init</STRONG> (Thumb, 94 bytes, Stack size 88 bytes, driver_uart_fifo.o(i.driver_uart_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = driver_uart_init &rArr; HAL_UART_Init &rArr; HAL_UART_MspInit &rArr; HAL_NVIC_SetPriority &rArr; __NVIC_SetPriority
+<P><STRONG><a name="[ac]"></a>__set_PRIMASK</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, driver_uart_fifo.o(i.__set_PRIMASK))
+<BR><BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_send
+</UL>
+
+<P><STRONG><a name="[8c]"></a>com2fifo_uart</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, driver_uart_fifo.o(i.com2fifo_uart))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = com2fifo_uart
+</UL>
+<BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+</UL>
+<BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;com_send_buf
+</UL>
+
+<P><STRONG><a name="[99]"></a>driver_uart_init</STRONG> (Thumb, 100 bytes, Stack size 96 bytes, driver_uart_fifo.o(i.driver_uart_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = driver_uart_init &rArr; HAL_UART_Init &rArr; UART_SetConfig &rArr; __aeabi_uldivmod
 </UL>
 <BR>[Calls]<UL><LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Init
-<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
 </UL>
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_fifo_driver_init
 </UL>
 
-<P><STRONG><a name="[8a]"></a>uart_fifo_irq</STRONG> (Thumb, 246 bytes, Stack size 24 bytes, driver_uart_fifo.o(i.uart_fifo_irq))
+<P><STRONG><a name="[8a]"></a>uart_fifo_irq</STRONG> (Thumb, 282 bytes, Stack size 24 bytes, driver_uart_fifo.o(i.uart_fifo_irq))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = uart_fifo_irq
 </UL>
 <BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART6_IRQHandler
@@ -963,6 +986,14 @@ Local Symbols
 <LI><a href="#[2f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
 <LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_IRQHandler
 <LI><a href="#[3e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART4_IRQHandler
+</UL>
+
+<P><STRONG><a name="[8f]"></a>uart_send</STRONG> (Thumb, 146 bytes, Stack size 24 bytes, driver_uart_fifo.o(i.uart_send))
+<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = uart_send
+</UL>
+<BR>[Calls]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__set_PRIMASK
+</UL>
+<BR>[Called By]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;com_send_buf
 </UL>
 
 <P><STRONG><a name="[64]"></a>i_board_end</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, comm_init.o(i.i_board_end))

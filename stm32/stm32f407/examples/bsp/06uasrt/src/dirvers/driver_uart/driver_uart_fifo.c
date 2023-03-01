@@ -6,6 +6,7 @@
  * Change Logs:
  * Data             Author                          Notes
  * 2023-02-17       vector(vector_qiu@163.com)      first version
+ * 2023-03-01       vector                          fix bug The serial port sending and receiving data exception
  *
  */
 
@@ -198,6 +199,7 @@ void USART6_IRQHandler(void)
 static void uart_send(driver_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _len);
 static error_t uart_get_char(driver_uart_fifo_t *_uart_fifo, uint8_t *_byte);
 static driver_uart_fifo_t *com2fifo_uart(COM_PORT_E _port);
+static void driver_uart_init(driver_uart_fifo_t dev, uint32_t _baudrate);
 
 /**
  * @brief Serial interrupt handling function
@@ -216,6 +218,7 @@ static void uart_fifo_irq(driver_uart_fifo_t *dev) {
 	if ((isrflags & USART_SR_RXNE) != RESET)
 	{
 		uint8_t ch;
+        CLEAR_BIT(dev->uart->SR, USART_SR_RXNE);     /* 清除RXNE接收标志 */
         /* Read data from the serial port receive data register and store it to the receive FIFO */
 		ch = READ_REG(dev->uart->DR);
 		dev->p_rx_fifo[dev->u16_rx_write] = ch;
@@ -250,6 +253,7 @@ static void uart_fifo_irq(driver_uart_fifo_t *dev) {
 			/* When the data of the send buffer has been fetched, it is forbidden to interrupt the send buffer over the empty */
             /* (note: the last data has not actually been sent at this time).*/
 			CLEAR_BIT(dev->uart->CR1, USART_CR1_TXEIE);
+            CLEAR_BIT(dev->uart->SR, USART_SR_TXE);     /* 清除TXE接收标志 */
 
 			/* Interrupt when data has been sent */
 			SET_BIT(dev->uart->CR1, USART_CR1_TCIE);
@@ -278,6 +282,7 @@ static void uart_fifo_irq(driver_uart_fifo_t *dev) {
 		{
 			/* Serial fifo data transmission is completed，disable interrupt after data has been sent */
 			CLEAR_BIT(dev->uart->CR1, USART_CR1_TCIE);
+            CLEAR_BIT(dev->uart->SR, USART_SR_TC);     /* 清除TC接收标志 */
 
 			/* 回调函数, 一般用来处理RS485通信，将RS485芯片设置为接收模式，避免抢占总线 */
 			if (dev->send_after)
@@ -591,17 +596,18 @@ bool uart_tx_empty(COM_PORT_E _port)
  *
  * @param dev Uart fifo struct
  */
-static void driver_uart_init(driver_uart_fifo_t dev) {
+static void driver_uart_init(driver_uart_fifo_t dev, uint32_t _baudrate) {
     UART_HandleTypeDef huart;
 
     huart.Instance = dev.uart;
-    huart.Init.BaudRate = UART4_FIFO_BAUDRATE;
+    huart.Init.BaudRate = _baudrate;
     huart.Init.WordLength = UART_WORDLENGTH_8B;
     huart.Init.StopBits = UART_STOPBITS_1;
     huart.Init.Parity = UART_PARITY_NONE;
     huart.Init.Mode = UART_MODE_TX_RX;
     huart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart.Init.OverSampling = UART_OVERSAMPLING_16;
+    huart.gState = HAL_UART_STATE_RESET;  /* 2023/3/1 Debug gState not set, HAL_UART_MspInit not call */
     if (HAL_UART_Init(&huart) != HAL_OK)
     {
         Error_Handler(__FILE__, __LINE__);
@@ -915,27 +921,27 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
  */
 int uart_fifo_driver_init(void) {
 #if UART4_FIFO_EN == 1
-    driver_uart_init(fifo_uart4);
+    driver_uart_init(fifo_uart4, UART4_FIFO_BAUDRATE);
 #endif /* UART4_FIFO_EN */
 
 #if UART5_FIFO_EN == 1
-    driver_uart_init(fifo_uart5);
+    driver_uart_init(fifo_uart5, UART5_FIFO_BAUDRATE);
 #endif /* UART5_FIFO_EN */
 
 #if UART1_FIFO_EN == 1
-    driver_uart_init(fifo_uart1);
+    driver_uart_init(fifo_uart1, UART1_FIFO_BAUDRATE);
 #endif /* UART1_FIFO_EN */
 
 #if UART2_FIFO_EN == 1
-    driver_uart_init(fifo_uart2);
+    driver_uart_init(fifo_uart2, UART2_FIFO_BAUDRATE);
 #endif /* UART2_FIFO_EN */
 
 #if UART3_FIFO_EN == 1
-    driver_uart_init(fifo_uart3);
+    driver_uart_init(fifo_uart3, UART3_FIFO_BAUDRATE);
 #endif /* UART3_FIFO_EN */
 
 #if UART6_FIFO_EN == 1
-    driver_uart_init(fifo_uart6);
+    driver_uart_init(fifo_uart6, UART6_FIFO_BAUDRATE);
 #endif /* UART6_FIFO_EN */
 	return 0;
 }

@@ -50,6 +50,7 @@ void key_handle(void) {
 			break;
 		case KEY_1_UP:
 			switch_led_on(&g_switch_led_devs[0]);
+			com_send_buf(COM1, "TEST", 4);
 			break;
 		case KEY_1_LONG:
 			switch_led_off(&g_switch_led_devs[0]);
