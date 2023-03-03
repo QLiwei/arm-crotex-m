@@ -4577,3 +4577,18 @@ typedef struct
 ![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230220-151821.png) 
 
 ![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230220-152520.png) 
+
+## 15.18 霍尔传感器接口
+
+![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230223-150734.png)
+
+3 个定时器输入引脚（TIMx_CH1、TIMx_CH2 和 TIMx_CH3）通过异或门连接到 TI1 输入通道，当一个通道信号发生改变时产生一个霍尔中断事件（这样描述应该正确吧），此定时器也会根据设置的频率进行计数定时，开启更新中断，会周期产生更新中断。
+
+主从模式
+
+
+
+
+
+# 16 ADC
+
