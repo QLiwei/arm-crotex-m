@@ -39,3 +39,10 @@ __pycache__/
 # JLink log and ini
 JLinkLog.txt
 JLinkSettings.ini
+
+*.lst
+*.map
+*.axf
+*.htm
+*.sct
+

@@ -17,41 +17,21 @@
 extern "C" {
 #endif
 
-#define DEVICE_LED1
-#define DEVICE_LED2
-#define DEVICE_LED3
+typedef enum {
+    DEVICE_LED01 = 0,
+    DEVICE_LED02,
+    DEVICE_LED03,
+    DEVICE_LED_ID_MAX,
+}device_led_id_e;
 
-#define LED1_CONFIG     {                           \
-                            GPIOE,                  \
-                            GPIO_PIN_3,              \
-                            0,                      \
-                        },                          \
+typedef enum {
+    DEVICE_LED_OFF,
+    DEVICE_LED_ON,
+}device_led_state_e;
 
-#define LED2_CONFIG     {                           \
-                            GPIOE,                  \
-                            GPIO_PIN_4,              \
-                            0,                      \
-                        },                          \
-
-#define LED3_CONFIG     {                           \
-                            GPIOG,                  \
-                            GPIO_PIN_9,              \
-                            0,                      \
-                        },                          \
-
-
-// GPIOx PINx en
-typedef struct switch_led_device
-{
-    GPIO_TypeDef *gpiox;
-    uint16_t gpio_pin;
-    uint8_t state;
-} switch_led_device_t;
-extern switch_led_device_t g_switch_led_devs[];
-
-void switch_led_on(switch_led_device_t *dev);
-void switch_led_off(switch_led_device_t *dev);
-void switch_led_toggle(switch_led_device_t *dev);
+device_led_state_e switch_led_on(device_led_id_e _id);
+device_led_state_e switch_led_off(device_led_id_e _id);
+void switch_led_toggle(device_led_id_e _id);
 
 #ifdef __cplusplus
 }

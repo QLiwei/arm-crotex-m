@@ -30,12 +30,12 @@ int main(void)
 	while (1)
 	{
 		HAL_Delay(1000);
-		switch_led_on(&g_switch_led_devs[0]);
-		switch_led_off(&g_switch_led_devs[1]);
-		switch_led_on(&g_switch_led_devs[2]);
+		switch_led_on(DEVICE_LED01);
+		switch_led_off(DEVICE_LED02);
+		switch_led_on(DEVICE_LED03);
 		HAL_Delay(1000);
-		switch_led_off(&g_switch_led_devs[0]);
-		switch_led_on(&g_switch_led_devs[1]);
-		switch_led_off(&g_switch_led_devs[2]);
+		switch_led_off(DEVICE_LED01);
+		switch_led_on(DEVICE_LED02);
+		switch_led_off(DEVICE_LED03);
 	}
 }

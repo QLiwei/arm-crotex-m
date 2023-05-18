@@ -42,40 +42,40 @@ int main(void)
 			switch (ukey_code)
 			{
 			case KEY_1_DOWN:
-				switch_led_on(&g_switch_led_devs[0]);
+				switch_led_on(DEVICE_LED01);
 				break;
 			case KEY_1_UP:
-				switch_led_on(&g_switch_led_devs[0]);
+				switch_led_on(DEVICE_LED01);
 				break;
 			case KEY_1_LONG:
-				switch_led_off(&g_switch_led_devs[0]);
+				switch_led_off(DEVICE_LED01);
 				break;
 			case KEY_2_DOWN:
-				switch_led_toggle(&g_switch_led_devs[0]);
+				switch_led_toggle(DEVICE_LED01);
 				break;
 			case KEY_2_UP:
-				switch_led_toggle(&g_switch_led_devs[0]);
+				switch_led_toggle(DEVICE_LED01);
 				break;
 			case KEY_2_LONG:
-				switch_led_toggle(&g_switch_led_devs[0]);
+				switch_led_toggle(DEVICE_LED01);
 				break;
 			case KEY_3_DOWN:
-				switch_led_toggle(&g_switch_led_devs[1]);
+				switch_led_toggle(DEVICE_LED02);
 				break;
 			case KEY_3_UP:
-				switch_led_toggle(&g_switch_led_devs[1]);
+				switch_led_toggle(DEVICE_LED02);
 				break;
 			case KEY_3_LONG:
-				switch_led_toggle(&g_switch_led_devs[1]);
+				switch_led_toggle(DEVICE_LED02);
 				break;
 			case KEY_4_DOWN:
-				switch_led_toggle(&g_switch_led_devs[2]);
+				switch_led_toggle(DEVICE_LED03);
 				break;
 			case KEY_4_UP:
-				switch_led_toggle(&g_switch_led_devs[2]);
+				switch_led_toggle(DEVICE_LED03);
 				break;
 			case KEY_4_LONG:
-				switch_led_toggle(&g_switch_led_devs[2]);
+				switch_led_toggle(DEVICE_LED03);
 				break;
 
 			default:

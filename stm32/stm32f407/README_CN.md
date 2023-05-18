@@ -4592,7 +4592,4 @@ typedef struct
 
 
 # 16 ADC
-
-=======
 ![](https://raw.githubusercontent.com/QLiwei/picgo/main/img/screenshot-20230220-152520.png) 
->>>>>>> b8d30acbfa9fa436360c75dff59aa91d9aa75d9c
