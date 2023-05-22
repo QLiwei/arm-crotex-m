@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F407xx,USE_HAL_DRIVER,USE_FULL_LL_DEIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers</IncludePath>
+              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\drivers;..\..\src\devices</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -361,7 +361,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -370,7 +370,7 @@
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>.\Objects\stm32f4xx.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -402,7 +402,7 @@
             <File>
               <FileName>base.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\02gpio_led\src\dirvers\base.c</FilePath>
+              <FilePath>..\..\src\drivers\base.c</FilePath>
             </File>
           </Files>
         </Group>
