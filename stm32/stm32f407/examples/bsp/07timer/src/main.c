@@ -12,6 +12,10 @@
 
 void key_handle(void);
 
+void tim01_task(void) {
+	switch_led_toggle(DEVICE_LED01);
+}
+
 int main(void)
 {
 	/*
@@ -32,6 +36,14 @@ int main(void)
 	soft_timer_set(ST_KEY_SCAN_TASK_INDEX, ST_CYCLE_10MS, ST_INFINIT_REPEAT, device_key_scan_10ms);
 	soft_timer_set(ST_BEEP_TASK_INDEX, ST_CYCLE_10MS, ST_INFINIT_REPEAT, device_beep_handle);
 	soft_timer_set(ST_KEY_HANDLE_TASK_INDEX, ST_CYCLE_1MS, ST_INFINIT_REPEAT, key_handle);
+	driver_tim_config_t config = {
+		.mode = MODE_PERIOD,
+		.cycle = 1000,
+		.time_uint = UNIT_1MS,
+		.task = tim01_task,
+	};
+	driver_tim_base_config(DRIVER_TIM1, config);
+	driver_tim_base_start(DRIVER_TIM1);
 	while (1)
 	{
 		soft_timer_run();

@@ -14,6 +14,7 @@
   */
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
+    driver_tim_base_irq(DRIVER_TIM9);
 }
 
 /**
@@ -21,7 +22,8 @@ void TIM1_BRK_TIM9_IRQHandler(void)
   */
 void TIM1_UP_TIM10_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM1);
+    driver_tim_base_irq(DRIVER_TIM10);
 }
 
 /**
@@ -29,7 +31,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
   */
 void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM11);
 }
 
 /**
@@ -45,7 +47,7 @@ void TIM1_CC_IRQHandler(void)
   */
 void TIM2_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM2);
 }
 
 /**
@@ -53,7 +55,7 @@ void TIM2_IRQHandler(void)
   */
 void TIM3_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM3);
 }
 
 /**
@@ -61,7 +63,7 @@ void TIM3_IRQHandler(void)
   */
 void TIM4_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM4);
 }
 
 /**
@@ -69,7 +71,7 @@ void TIM4_IRQHandler(void)
   */
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM12);
 }
 
 /**
@@ -77,7 +79,8 @@ void TIM8_BRK_TIM12_IRQHandler(void)
   */
 void TIM8_UP_TIM13_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM8);
+    driver_tim_base_irq(DRIVER_TIM13);
 }
 
 /**
@@ -85,7 +88,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
   */
 void TIM8_TRG_COM_TIM14_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM14);
 }
 
 /**
@@ -101,7 +104,7 @@ void TIM8_CC_IRQHandler(void)
   */
 void TIM5_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM5);
 }
 
 /**
@@ -109,7 +112,7 @@ void TIM5_IRQHandler(void)
   */
 void TIM6_DAC_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM6);
 }
 
 /**
@@ -117,5 +120,5 @@ void TIM6_DAC_IRQHandler(void)
   */
 void TIM7_IRQHandler(void)
 {
-
+    driver_tim_base_irq(DRIVER_TIM7);
 }

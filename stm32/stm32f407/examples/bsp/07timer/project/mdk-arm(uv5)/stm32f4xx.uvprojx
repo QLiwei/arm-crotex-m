@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F407xx,USE_HAL_DRIVER,USE_FULL_LL_DEIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\driver_uart</IncludePath>
+              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\driver_uart;..\..\src\dirvers\driver_timer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -425,6 +425,21 @@
               <FileName>driver_uart_fifo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver_timer_base.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\driver_timer\driver_timer_base.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\driver_timer\driver_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver_timer_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\driver_timer\driver_timer_it.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -515,6 +530,16 @@
               <FileName>stm32f4xx_hal_dma_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\06uasrt\libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_tim_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\06uasrt\libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim_ex.c</FilePath>
             </File>
           </Files>
         </Group>

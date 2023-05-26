@@ -1,6 +1,7 @@
 #ifndef __DRIVER_TIMER_IT_H__
 #define __DRIVER_TIMER_IT_H__
 
+#include "driver_timer.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
