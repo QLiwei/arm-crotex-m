@@ -1,6 +1,6 @@
 /**
- * @file driver_uart_fifo.h
- * @brief urat fifo driver definition header file
+ * @file drv_uart_fifo.h
+ * @brief urat fifo drv definition header file
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
@@ -8,8 +8,8 @@
  * 2023-02-17       vector(vector_qiu@163.com)      first version
  *
  */
-#ifndef __DRIVER_UART_FIFO_H__
-#define __DRIVER_UART_FIFO_H__
+#ifndef __DRV_UART_FIFO_H__
+#define __DRV_UART_FIFO_H__
 
 #include "base.h"
 
@@ -61,7 +61,7 @@ typedef enum
 	COM6 = 5,	/* USART6 */
 }COM_PORT_E;
 
-typedef struct driver_uart_fifo
+typedef struct drv_uart_fifo
 {
 	USART_TypeDef *uart;		        /* STM32内部串口设备指针 */
 	uint8_t *p_tx_fifo;			        /* 发送缓冲区 */
@@ -80,7 +80,7 @@ typedef struct driver_uart_fifo
 	void (*send_after)(void); 	        /* 发送完毕的回调函数指针（主要用于RS485将发送模式切换为接收模式） */
 	void (*recive_new)(uint8_t _byte);	/* 串口收到数据的回调函数指针 */
 	uint8_t sending;			        /* send state 1: senging */
-}driver_uart_fifo_t;
+}drv_uart_fifo_t;
 
 void com_send_buf(COM_PORT_E _port, uint8_t *_buf, uint16_t _len);
 void com_send_char(COM_PORT_E _port, uint8_t _byte);

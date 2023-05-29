@@ -1,13 +1,15 @@
 /**
- * @file driver_pwm_out.c
+ * @file drv_pwm_out.c
  * @brief pwm out driver
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
  * Data             Author                          Notes
  * 2023-05-18       vector(vector.qiu@gmail.com)    first version
+ * 2023-05-29       vector                          rename driver to drv
+ *
  */
-#include "driver_timer.h"
+#include "drv_timer.h"
 
 
 typedef struct {
@@ -30,9 +32,9 @@ typedef struct {
     uint16_t gpio_pin_channel3_n;
     GPIO_TypeDef* gpio_brake;
     uint16_t gpio_pin_brake;
-    driver_pwm_out_config_t config;
-} driver_pwm_put_dev_t;
-static driver_pwm_put_dev_t dev[DRIVER_TIM_NONE] = {
+    drv_pwm_out_config_t config;
+} drv_pwm_put_dev_t;
+static drv_pwm_put_dev_t dev[DRV_TIM_NONE] = {
     {
         .timx = TIM1,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
@@ -231,10 +233,10 @@ static driver_pwm_put_dev_t dev[DRIVER_TIM_NONE] = {
     },
 };
 
-static void driver_pwm_gpio_config(driver_tim_id_e _id);
-static uint32_t driver_pwm_out_get_channel(pwm_channel_e _channel);
+static void drv_pwm_gpio_config(drv_tim_id_e _id);
+static uint32_t drv_pwm_out_get_channel(pwm_channel_e _channel);
 
-static void driver_pwm_gpio_config(driver_tim_id_e _id) {
+static void drv_pwm_gpio_config(drv_tim_id_e _id) {
     /* parameter */
 
     if (dev[_id].config.channel1_enable == true) {
@@ -263,7 +265,7 @@ static void driver_pwm_gpio_config(driver_tim_id_e _id) {
     }
 }
 
-static uint32_t driver_pwm_out_get_channel(pwm_channel_e _channel) {
+static uint32_t drv_pwm_out_get_channel(pwm_channel_e _channel) {
     uint32_t channel;
     switch (_channel)
     {
@@ -289,10 +291,10 @@ static uint32_t driver_pwm_out_get_channel(pwm_channel_e _channel) {
     return channel;
 }
 
-void driver_pwm_out_config(driver_tim_id_e _id, driver_pwm_out_config_t _config) {
+void drv_pwm_out_config(drv_tim_id_e _id, drv_pwm_out_config_t _config) {
     /* parameter */
-    assert_param(_id < DRIVER_TIM_NONE);
-    assert_param(_id != DRIVER_TIM6 && _id != DRIVER_TIM7);
+    assert_param(_id < drv_TIM_NONE);
+    assert_param(_id != drv_TIM6 && _id != drv_TIM7);
     assert_param(_config.default_duty_cycle >= 0 && _config.default_duty_cycle <= 10000);
     assert_param(_config.frequency > 0);
 
@@ -401,19 +403,19 @@ void driver_pwm_out_config(driver_tim_id_e _id, driver_pwm_out_config_t _config)
         Error_Handler(__FILE__, __LINE__);
     }
 
-    driver_pwm_gpio_config(_id);
+    drv_pwm_gpio_config(_id);
 }
 
-void driver_pwm_out_start(driver_tim_id_e _id, pwm_channel_e _channel) {
+void drv_pwm_out_start(drv_tim_id_e _id, pwm_channel_e _channel) {
 
-    HAL_TIM_PWM_Start(&dev[_id].htimx, driver_pwm_out_get_channel(_channel));
+    HAL_TIM_PWM_Start(&dev[_id].htimx, drv_pwm_out_get_channel(_channel));
 }
 
-void driver_pwm_out_stop(driver_tim_id_e _id, pwm_channel_e _channel) {
-    HAL_TIM_PWM_Stop(&dev[_id].htimx, driver_pwm_out_get_channel(_channel));
+void drv_pwm_out_stop(drv_tim_id_e _id, pwm_channel_e _channel) {
+    HAL_TIM_PWM_Stop(&dev[_id].htimx, drv_pwm_out_get_channel(_channel));
 }
 
 
-void driver_brake_irq(driver_tim_id_e _id) {
+void drv_brake_irq(drv_tim_id_e _id) {
 
 }

@@ -1,7 +1,7 @@
-#ifndef __DRIVER_TIMER_IT_H__
-#define __DRIVER_TIMER_IT_H__
+#ifndef __DRV_TIMER_IT_H__
+#define __DRV_TIMER_IT_H__
 
-#include "driver_timer.h"
+#include "drv_timer.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -24,4 +24,4 @@ void TIM7_IRQHandler(void);
 }
 #endif
 
-#endif /* __DRIVER_TIMER_IT_H__ */
+#endif /* __drv_TIMER_IT_H__ */

@@ -1,5 +1,5 @@
 /**
- * @file driver_uart_fifo.c
+ * @file drv_uart_fifo.c
  * @brief urat driver
  * @copyright Copyright (c) 2023
  *
@@ -7,21 +7,22 @@
  * Data             Author                          Notes
  * 2023-02-17       vector(vector_qiu@163.com)      first version
  * 2023-03-01       vector                          fix bug The serial port sending and receiving data exception
+ * 2023-05-29       vector                          rename driver to drv
  *
  */
 
-#include "driver_uart_fifo.h"
+#include "drv_uart_fifo.h"
 #include <stdio.h>
 
 #if (UART4_FIFO_EN == 1) || ( UART5_FIFO_EN == 1) || (UART1_FIFO_EN == 1) \
     || (UART2_FIFO_EN == 1) || (UART3_FIFO_EN == 1) || (UART6_FIFO_EN == 1)
 
-static void uart_fifo_irq(driver_uart_fifo_t *dev);
+static void uart_fifo_irq(drv_uart_fifo_t *dev);
 
 #if UART4_FIFO_EN == 1
 static uint8_t s_uart4_tx_fifo[UART4_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart4_rx_fifo[UART4_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart4 = {
+static drv_uart_fifo_t fifo_uart4 = {
     .uart = UART4,
     .p_tx_fifo = s_uart4_tx_fifo,
     .p_rx_fifo = s_uart4_rx_fifo,
@@ -51,7 +52,7 @@ void UART4_IRQHandler(void)
 #if UART5_FIFO_EN == 1
 static uint8_t s_uart5_tx_fifo[UART5_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart5_rx_fifo[UART5_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart5 = {
+static drv_uart_fifo_t fifo_uart5 = {
     .uart = UART5,
     .p_tx_fifo = s_uart5_tx_fifo,
     .p_rx_fifo = s_uart5_rx_fifo,
@@ -81,7 +82,7 @@ void UART5_IRQHandler(void)
 #if UART1_FIFO_EN == 1
 static uint8_t s_uart1_tx_fifo[UART1_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart1_rx_fifo[UART1_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart1 = {
+static drv_uart_fifo_t fifo_uart1 = {
     .uart = USART1,
     .p_tx_fifo = s_uart1_tx_fifo,
     .p_rx_fifo = s_uart1_rx_fifo,
@@ -111,7 +112,7 @@ void USART1_IRQHandler(void)
 #if UART2_FIFO_EN == 1
 static uint8_t s_uart2_tx_fifo[UART2_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart2_rx_fifo[UART2_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart2 = {
+static drv_uart_fifo_t fifo_uart2 = {
     .uart = USART2,
     .p_tx_fifo = s_uart2_tx_fifo,
     .p_rx_fifo = s_uart2_rx_fifo,
@@ -140,7 +141,7 @@ void USART2_IRQHandler(void)
 #if UART3_FIFO_EN == 1
 static uint8_t s_uart3_tx_fifo[UART3_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart3_rx_fifo[UART3_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart3 = {
+static drv_uart_fifo_t fifo_uart3 = {
     .uart = USART3,
     .p_tx_fifo = s_uart3_tx_fifo,
     .p_rx_fifo = s_uart3_rx_fifo,
@@ -169,7 +170,7 @@ void USART3_IRQHandler(void)
 #if UART6_FIFO_EN == 1
 static uint8_t s_uart6_tx_fifo[UART6_TX_FIFO_SIZE];		/* 发送缓冲区 */
 static uint8_t s_uart6_rx_fifo[UART6_RX_FIFO_SIZE];		/* 接收缓冲区 */
-static driver_uart_fifo_t fifo_uart6 = {
+static drv_uart_fifo_t fifo_uart6 = {
     .uart = USART6,
     .p_tx_fifo = s_uart6_tx_fifo,
     .p_rx_fifo = s_uart6_rx_fifo,
@@ -196,19 +197,19 @@ void USART6_IRQHandler(void)
 }
 #endif /* UART6_FIFO_EN */
 
-static void uart_send(driver_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _len);
-static error_t uart_get_char(driver_uart_fifo_t *_uart_fifo, uint8_t *_byte);
-static driver_uart_fifo_t *com2fifo_uart(COM_PORT_E _port);
-static void driver_uart_init(driver_uart_fifo_t dev, uint32_t _baudrate);
+static void uart_send(drv_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _len);
+static error_t uart_get_char(drv_uart_fifo_t *_uart_fifo, uint8_t *_byte);
+static drv_uart_fifo_t *com2fifo_uart(COM_PORT_E _port);
+static void drv_uart_init(drv_uart_fifo_t dev, uint32_t _baudrate);
 
 /**
  * @brief Serial interrupt handling function
  * @callgraph UARTx_IRQHandler()
  * @verbatim
  *
- * @param dev urat fifo driver struct
+ * @param dev urat fifo drv struct
  */
-static void uart_fifo_irq(driver_uart_fifo_t *dev) {
+static void uart_fifo_irq(drv_uart_fifo_t *dev) {
     uint32_t isrflags   = READ_REG(dev->uart->SR);
 	uint32_t cr1its     = READ_REG(dev->uart->CR1);
 	uint32_t cr3its     = READ_REG(dev->uart->CR3);
@@ -309,13 +310,13 @@ static void uart_fifo_irq(driver_uart_fifo_t *dev) {
 }
 
 /**
- * @brief The urat fifo driver struct is found by the COM_PORT_E enumeration variable
+ * @brief The urat fifo drv struct is found by the COM_PORT_E enumeration variable
  *
  * @param _port COMx
- * @return driver_uart_fifo_t* COMx corresponding urat fifo driver struct
- * @retval 0:urat fifo driver struct is not defined
+ * @return drv_uart_fifo_t* COMx corresponding urat fifo drv struct
+ * @retval 0:urat fifo drv struct is not defined
  */
-static driver_uart_fifo_t *com2fifo_uart(COM_PORT_E _port) {
+static drv_uart_fifo_t *com2fifo_uart(COM_PORT_E _port) {
     if (_port == COM1)
 	{
 		#if UART1_FIFO_EN == 1
@@ -380,7 +381,7 @@ static driver_uart_fifo_t *com2fifo_uart(COM_PORT_E _port) {
  */
 void com_send_buf(COM_PORT_E _port, uint8_t *_buf, uint16_t _len)
 {
-	driver_uart_fifo_t *uart_fifo;
+	drv_uart_fifo_t *uart_fifo;
 
 	uart_fifo = com2fifo_uart(_port);
 	if (uart_fifo == 0)
@@ -414,12 +415,12 @@ void com_send_char(COM_PORT_E _port, uint8_t _byte)
  * @param _port COMx
  * @param _byte Character to be received
  * @return error_t EOK:Get data successful
- *              -EINVAL: Urat fifo driver struct is not defined
+ *              -EINVAL: Urat fifo drv struct is not defined
  *              -EEMPTY:There is no data to fetch
  */
 error_t com_get_char(COM_PORT_E _port, uint8_t *_byte)
 {
-	driver_uart_fifo_t *uart_fifo;
+	drv_uart_fifo_t *uart_fifo;
 
 	uart_fifo = com2fifo_uart(_port);
 	if (uart_fifo == 0)
@@ -434,11 +435,11 @@ error_t com_get_char(COM_PORT_E _port, uint8_t *_byte)
  * @brief Clear Tx FIFO
  *
  * @param _port COMx
- * @return error_t EOK:Clear Tx FIFO successful -EINVAL:Urat fifo driver struct is not defined
+ * @return error_t EOK:Clear Tx FIFO successful -EINVAL:Urat fifo drv struct is not defined
  */
 error_t com_clear_tx_fifo(COM_PORT_E _port)
 {
-	driver_uart_fifo_t *uart_fifo;
+	drv_uart_fifo_t *uart_fifo;
 
 	uart_fifo = com2fifo_uart(_port);
 	if (uart_fifo == 0)
@@ -456,11 +457,11 @@ error_t com_clear_tx_fifo(COM_PORT_E _port)
  * @brief Clear Rx FIFO
  *
  * @param _port COMx
- * @return error_t EOK:Clear Rx FIFO successful -EINVAL:Urat fifo driver struct is not defined
+ * @return error_t EOK:Clear Rx FIFO successful -EINVAL:Urat fifo drv struct is not defined
  */
 error_t com_clear_rx_fifo(COM_PORT_E _port)
 {
-	driver_uart_fifo_t *uart_fifo;
+	drv_uart_fifo_t *uart_fifo;
 
 	uart_fifo = com2fifo_uart(_port);
 	if (uart_fifo == 0)
@@ -481,7 +482,7 @@ error_t com_clear_rx_fifo(COM_PORT_E _port)
  * @param _buf Data buffer
  * @param _len Data length
  */
-static void uart_send(driver_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _len)
+static void uart_send(drv_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _len)
 {
 	uint16_t i;
 
@@ -532,7 +533,7 @@ static void uart_send(driver_uart_fifo_t *_uart_fifo, uint8_t *_buf, uint16_t _l
  * @param _byte Save the received data
  * @return error_t EOK:Get the character successfully. -EEMPTY:No characters were received
  */
-static error_t uart_get_char(driver_uart_fifo_t *_uart_fifo, uint8_t *_byte)
+static error_t uart_get_char(drv_uart_fifo_t *_uart_fifo, uint8_t *_byte)
 {
 	uint16_t count;
 
@@ -574,7 +575,7 @@ bool uart_tx_empty(COM_PORT_E _port)
 {
    uint8_t _sending;
 
-   driver_uart_fifo_t *uart_fifo;
+   drv_uart_fifo_t *uart_fifo;
 
 	uart_fifo = com2fifo_uart(_port);
 	if (uart_fifo == 0)
@@ -592,11 +593,11 @@ bool uart_tx_empty(COM_PORT_E _port)
 }
 
 /**
- * @brief Uart driver initialize
+ * @brief Uart drv initialize
  *
  * @param dev Uart fifo struct
  */
-static void driver_uart_init(driver_uart_fifo_t dev, uint32_t _baudrate) {
+static void drv_uart_init(drv_uart_fifo_t dev, uint32_t _baudrate) {
     UART_HandleTypeDef huart;
 
     huart.Instance = dev.uart;
@@ -680,7 +681,7 @@ int fgetc(FILE *f)
  *   (#) Program the Baud Rate, Word Length, Stop Bit, Parity, Hardware
  *       flow control and Mode(Receiver/Transmitter) in the huart Init structure.
  *
- * @param dev driver_uart_fifo_t handle structure
+ * @param dev drv_uart_fifo_t handle structure
  */
 void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -915,36 +916,36 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 }
 
 /**
- * @brief The uart driver is initialized automatically
+ * @brief The uart drv is initialized automatically
  *
  * @return int
  */
-int uart_fifo_driver_init(void) {
+int uart_fifo_drv_init(void) {
 #if UART4_FIFO_EN == 1
-    driver_uart_init(fifo_uart4, UART4_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart4, UART4_FIFO_BAUDRATE);
 #endif /* UART4_FIFO_EN */
 
 #if UART5_FIFO_EN == 1
-    driver_uart_init(fifo_uart5, UART5_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart5, UART5_FIFO_BAUDRATE);
 #endif /* UART5_FIFO_EN */
 
 #if UART1_FIFO_EN == 1
-    driver_uart_init(fifo_uart1, UART1_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart1, UART1_FIFO_BAUDRATE);
 #endif /* UART1_FIFO_EN */
 
 #if UART2_FIFO_EN == 1
-    driver_uart_init(fifo_uart2, UART2_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart2, UART2_FIFO_BAUDRATE);
 #endif /* UART2_FIFO_EN */
 
 #if UART3_FIFO_EN == 1
-    driver_uart_init(fifo_uart3, UART3_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart3, UART3_FIFO_BAUDRATE);
 #endif /* UART3_FIFO_EN */
 
 #if UART6_FIFO_EN == 1
-    driver_uart_init(fifo_uart6, UART6_FIFO_BAUDRATE);
+    drv_uart_init(fifo_uart6, UART6_FIFO_BAUDRATE);
 #endif /* UART6_FIFO_EN */
 	return 0;
 }
-INIT_BOARD_EXPORT(uart_fifo_driver_init);
+INIT_BOARD_EXPORT(uart_fifo_drv_init);
 
 #endif /* UARTx_FIFO_EN*/

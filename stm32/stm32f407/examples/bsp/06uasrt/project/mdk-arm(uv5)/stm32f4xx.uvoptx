@@ -188,7 +188,7 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</Filename>
+          <Filename>E:\arm-crotex-m\stm32\stm32f407\examples\bsp\06uasrt\src\dirvers\driver_uart\driver_uart_fifo.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\stm32f4xx\../../src/dirvers/driver_uart/driver_uart_fifo.c\930</Expression>
         </Bp>
@@ -399,8 +399,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</PathWithFileName>
-      <FilenameWithoutPath>driver_uart_fifo.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\src\dirvers\drv_uart\drv_uart_fifo.c</PathWithFileName>
+      <FilenameWithoutPath>drv_uart_fifo.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

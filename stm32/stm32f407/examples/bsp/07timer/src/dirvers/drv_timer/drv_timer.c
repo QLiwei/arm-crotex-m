@@ -1,13 +1,15 @@
 /**
- * @file driver_timer.c
+ * @file drv_timer.c
  * @brief timer common
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
  * Data             Author                          Notes
  * 2023-05-25       vector(vector.qiu@gmail.com)    first version
+ * 2023-05-29       vector                          rename driver to drv
+ *
  */
-#include "driver_timer.h"
+#include "drv_timer.h"
 
 #define APB2_TIMER_CLK  (168000000)
 #define APB1_TIMER_CLK  (84000000)

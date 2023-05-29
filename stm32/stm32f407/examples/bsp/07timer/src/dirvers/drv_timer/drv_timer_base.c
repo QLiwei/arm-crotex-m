@@ -1,13 +1,14 @@
 /**
- * @file driver_timer_base.c
+ * @file drv_timer_base.c
  * @brief timer base driver
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
  * Data             Author                          Notes
  * 2023-05-18       vector(vector.qiu@gmail.com)    first version
+ * 2023-05-29       vector                          rename driver to drv
  */
-#include "driver_timer.h"
+#include "drv_timer.h"
 
 
 /*
@@ -33,9 +34,9 @@ typedef struct {
     uint32_t preempt_priority;
     uint32_t sub_priority;
     uint32_t clock_division;
-    driver_tim_config_t config;
-}driver_timer_base_dev_t;
-static driver_timer_base_dev_t dev[DRIVER_TIM_NONE] = {
+    drv_tim_config_t config;
+}drv_timer_base_dev_t;
+static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
     {
         .timx = TIM1,
         .irqn_type = TIM1_UP_TIM10_IRQn,
@@ -136,8 +137,8 @@ static driver_timer_base_dev_t dev[DRIVER_TIM_NONE] = {
     },
 };
 
-void driver_tim_base_config(driver_tim_id_e _id, driver_tim_config_t _config) {
-    assert_param(_id < DRIVER_TIM_NONE);
+void drv_tim_base_config(drv_tim_id_e _id, drv_tim_config_t _config) {
+    assert_param(_id < DRV_TIM_NONE);
     assert_param(_config.cycle > 0);
     assert_param(_config.task != NULL);
 
@@ -195,17 +196,17 @@ void driver_tim_base_config(driver_tim_id_e _id, driver_tim_config_t _config) {
     }
 }
 
-void driver_tim_base_start(driver_tim_id_e _id) {
-    assert_param(_id < DRIVER_TIM_NONE);
+void drv_tim_base_start(drv_tim_id_e _id) {
+    assert_param(_id < DRV_TIM_NONE);
     HAL_TIM_Base_Start(&dev[_id].htimx);
 }
 
-void driver_tim_base_stop(driver_tim_id_e _id) {
-    assert_param(_id < DRIVER_TIM_NONE);
+void drv_tim_base_stop(drv_tim_id_e _id) {
+    assert_param(_id < DRV_TIM_NONE);
     HAL_TIM_Base_Stop(&dev[_id].htimx);
 }
 
-void driver_tim_base_irq(driver_tim_id_e _id) {
+void drv_tim_base_irq(drv_tim_id_e _id) {
     if (__HAL_TIM_GET_FLAG(&dev[_id].htimx, TIM_FLAG_UPDATE) != RESET)
     {
         if (__HAL_TIM_GET_IT_SOURCE(&dev[_id].htimx, TIM_IT_UPDATE) != RESET)

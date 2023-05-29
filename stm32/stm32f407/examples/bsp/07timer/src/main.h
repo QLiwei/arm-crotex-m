@@ -16,8 +16,8 @@
 #include "device_key.h"
 #include "device_beep.h"
 #include "soft_timer.h"
-#include "driver_uart_fifo.h"
-#include "driver_timer.h"
+#include "drv_uart_fifo.h"
+#include "drv_timer.h"
 
 #ifdef __cplusplus
 extern "C" {

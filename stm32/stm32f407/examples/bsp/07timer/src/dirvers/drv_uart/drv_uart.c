@@ -1,6 +1,6 @@
 /**
- * @file driver_uart.c
- * @brief urat driver
+ * @file drv_uart.c
+ * @brief urat drv
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
@@ -9,13 +9,13 @@
  *
  */
 
-#include "driver_uart.h"
+#include "drv_uart.h"
 
 #if UART4_EN == 1
 UART_HandleTypeDef huart4;
-static void driver_uart4_init(void);
+static void drv_uart4_init(void);
 
-static void driver_uart4_init(void) {
+static void drv_uart4_init(void) {
     huart4.Instance = UART4;
     huart4.Init.BaudRate = UART4_BAUDRATE;
     huart4.Init.WordLength = UART_WORDLENGTH_8B;
@@ -41,9 +41,9 @@ void UART4_IRQHandler(void)
 
 #if UART5_EN == 1
 UART_HandleTypeDef huart5;
-static void driver_uart5_init(void);
+static void drv_uart5_init(void);
 
-static void driver_uart5_init(void)
+static void drv_uart5_init(void)
 {
     huart5.Instance = UART5;
     huart5.Init.BaudRate = UART5_BAUDRATE;
@@ -70,9 +70,9 @@ void UART5_IRQHandler(void)
 
 #if UART1_EN == 1
 UART_HandleTypeDef huart1;
-static void driver_usart1_init(void);
+static void drv_usart1_init(void);
 
-static void driver_usart1_init(void)
+static void drv_usart1_init(void)
 {
     huart1.Instance = USART1;
     huart1.Init.BaudRate = UART1_BAUDRATE;
@@ -99,9 +99,9 @@ void USART1_IRQHandler(void)
 
 #if UART2_EN
 UART_HandleTypeDef huart2;
-static void driver_uasrt2_init(void);
+static void drv_uasrt2_init(void);
 
-static void driver_usart2_init(void)
+static void drv_usart2_init(void)
 {
     huart2.Instance = USART2;
     huart2.Init.BaudRate = UART2_BAUDRATE;
@@ -128,9 +128,9 @@ void USART2_IRQHandler(void)
 
 #if UART3_EN == 1
 UART_HandleTypeDef huart3;
-static void driver_uasrt3_init(void);
+static void drv_uasrt3_init(void);
 
-static void driver_uasrt3_init(void)
+static void drv_uasrt3_init(void)
 {
     huart3.Instance = USART3;
     huart3.Init.BaudRate = UART3_BAUDRATE;
@@ -157,9 +157,9 @@ void USART3_IRQHandler(void)
 
 #if UART6_EN == 1
 UART_HandleTypeDef huart6;
-static void driver_uasrt6_init(void);
+static void drv_uasrt6_init(void);
 
-static void driver_usart6_init(void)
+static void drv_usart6_init(void)
 {
     huart6.Instance = USART6;
     huart6.Init.BaudRate = UART6_BAUDRATE;
@@ -446,34 +446,34 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /**
- * @brief The uart driver is initialized automatically
+ * @brief The uart drv is initialized automatically
  *
  * @return int
  */
-int driver_uart(void) {
+int drv_uart(void) {
 #if UART4_EN == 1
-    driver_uart4_init();
+    drv_uart4_init();
 #endif /* UART4_EN */
 
 #if UART5_EN == 1
-    driver_uart5_init();
+    drv_uart5_init();
 #endif /* UART5_EN */
 
 #if UART1_EN == 1
-    driver_usart1_init();
+    drv_usart1_init();
 #endif /* UART1_EN */
 
 #if UART2_EN == 1
-    driver_usart2_init();
+    drv_usart2_init();
 #endif /* UART2_EN */
 
 #if UART3_EN == 1
-    driver_uasrt3_init();
+    drv_uasrt3_init();
 #endif /* UART3_EN */
 
 #if UART6_EN == 1
-    driver_usart6_init();
+    drv_usart6_init();
 #endif
 	return 0;
 }
-INIT_BOARD_EXPORT(driver_uart);
+INIT_BOARD_EXPORT(drv_uart);

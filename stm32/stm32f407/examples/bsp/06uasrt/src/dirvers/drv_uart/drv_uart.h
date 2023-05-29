@@ -1,5 +1,5 @@
 /**
- * @file driver_uart.h
+ * @file drv_uart.h
  * @brief urat driver definition header file
  * @copyright Copyright (c) 2023
  *
@@ -8,8 +8,8 @@
  * 2023-02-16       vector(vector_qiu@163.com)      first version
  *
  */
-#ifndef __DRIVER_UART_H__
-#define __DRIVER_UART_H__
+#ifndef __DRV_UART_H__
+#define __DRV_UART_H__
 
 #include "base.h"
 

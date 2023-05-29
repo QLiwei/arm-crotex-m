@@ -1,20 +1,22 @@
 /**
- * @file driver_timer_it.c
+ * @file drv_timer_it.c
  * @brief timer interrupt
  * @copyright Copyright (c) 2023
  *
  * Change Logs:
  * Data             Author                          Notes
  * 2023-05-25       vector(vector.qiu@gmail.com)    first version
+ * 2023-05-29       vector                          rename driver to drv
+ *
  */
-#include "driver_timer_it.h"
+#include "drv_timer_it.h"
 
 /**
   * @brief This function handles TIM1 break interrupt and TIM9 global interrupt.
   */
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM9);
+    drv_tim_base_irq(DRV_TIM9);
 }
 
 /**
@@ -22,8 +24,8 @@ void TIM1_BRK_TIM9_IRQHandler(void)
   */
 void TIM1_UP_TIM10_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM1);
-    driver_tim_base_irq(DRIVER_TIM10);
+    drv_tim_base_irq(DRV_TIM1);
+    drv_tim_base_irq(DRV_TIM10);
 }
 
 /**
@@ -31,7 +33,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
   */
 void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM11);
+    drv_tim_base_irq(DRV_TIM11);
 }
 
 /**
@@ -47,7 +49,7 @@ void TIM1_CC_IRQHandler(void)
   */
 void TIM2_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM2);
+    drv_tim_base_irq(DRV_TIM2);
 }
 
 /**
@@ -55,7 +57,7 @@ void TIM2_IRQHandler(void)
   */
 void TIM3_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM3);
+    drv_tim_base_irq(DRV_TIM3);
 }
 
 /**
@@ -63,7 +65,7 @@ void TIM3_IRQHandler(void)
   */
 void TIM4_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM4);
+    drv_tim_base_irq(DRV_TIM4);
 }
 
 /**
@@ -71,7 +73,7 @@ void TIM4_IRQHandler(void)
   */
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM12);
+    drv_tim_base_irq(DRV_TIM12);
 }
 
 /**
@@ -79,8 +81,8 @@ void TIM8_BRK_TIM12_IRQHandler(void)
   */
 void TIM8_UP_TIM13_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM8);
-    driver_tim_base_irq(DRIVER_TIM13);
+    drv_tim_base_irq(DRV_TIM8);
+    drv_tim_base_irq(DRV_TIM13);
 }
 
 /**
@@ -88,7 +90,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
   */
 void TIM8_TRG_COM_TIM14_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM14);
+    drv_tim_base_irq(DRV_TIM14);
 }
 
 /**
@@ -104,7 +106,7 @@ void TIM8_CC_IRQHandler(void)
   */
 void TIM5_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM5);
+    drv_tim_base_irq(DRV_TIM5);
 }
 
 /**
@@ -112,7 +114,7 @@ void TIM5_IRQHandler(void)
   */
 void TIM6_DAC_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM6);
+    drv_tim_base_irq(DRV_TIM6);
 }
 
 /**
@@ -120,5 +122,5 @@ void TIM6_DAC_IRQHandler(void)
   */
 void TIM7_IRQHandler(void)
 {
-    driver_tim_base_irq(DRIVER_TIM7);
+    drv_tim_base_irq(DRV_TIM7);
 }

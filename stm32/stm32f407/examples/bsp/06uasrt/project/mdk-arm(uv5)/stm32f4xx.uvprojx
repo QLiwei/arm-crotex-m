@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F407xx,USE_HAL_DRIVER,USE_FULL_LL_DEIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\driver_uart</IncludePath>
+              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\drv_uart</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -422,9 +422,9 @@
               <FilePath>..\..\src\dirvers\base.c</FilePath>
             </File>
             <File>
-              <FileName>driver_uart_fifo.c</FileName>
+              <FileName>drv_uart_fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_uart\drv_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>

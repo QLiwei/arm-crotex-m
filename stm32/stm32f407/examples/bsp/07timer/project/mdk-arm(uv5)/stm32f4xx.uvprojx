@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F407xx,USE_HAL_DRIVER,USE_FULL_LL_DEIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\driver_uart;..\..\src\dirvers\driver_timer</IncludePath>
+              <IncludePath>..\..\libraries\CMSIS\Include;..\..\libraries\STM32F4xx\Include;..\..\libraries\STM32F4xx_HAL_Driver\Inc;..\..\libraries\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\src;..\..\src\common;..\..\src\dirvers;..\..\src\devices\device_switch_led;..\..\src\devices\device_key;..\..\src\devices\device_beep;..\..\src\components\soft_timer;..\..\src\dirvers\drv_timer;..\..\src\dirvers\drv_uart</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -422,29 +422,39 @@
               <FilePath>..\..\src\dirvers\base.c</FilePath>
             </File>
             <File>
-              <FileName>driver_uart_fifo.c</FileName>
+              <FileName>drv_pwm_capture.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_uart\driver_uart_fifo.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_pwm_capture.c</FilePath>
             </File>
             <File>
-              <FileName>driver_timer_base.c</FileName>
+              <FileName>drv_pwm_out.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_timer\driver_timer_base.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_pwm_out.c</FilePath>
             </File>
             <File>
-              <FileName>driver_timer.c</FileName>
+              <FileName>drv_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_timer\driver_timer.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_timer.c</FilePath>
             </File>
             <File>
-              <FileName>driver_timer_it.c</FileName>
+              <FileName>drv_timer_base.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_timer\driver_timer_it.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_timer_base.c</FilePath>
             </File>
             <File>
-              <FileName>driver_pwm_out.c</FileName>
+              <FileName>drv_timer_encoder.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\driver_timer\driver_pwm_out.c</FilePath>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_timer_encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_timer_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\drv_timer\drv_timer_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_uart_fifo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\drv_uart\drv_uart_fifo.c</FilePath>
             </File>
           </Files>
         </Group>
