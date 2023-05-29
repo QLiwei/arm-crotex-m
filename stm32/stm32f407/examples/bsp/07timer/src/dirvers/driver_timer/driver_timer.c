@@ -55,3 +55,62 @@ void rcc_tim_enable(TIM_TypeDef* TIMx) {
         Error_Handler(__FILE__, __LINE__);
     }
 }
+
+void rcc_tim_disable(TIM_TypeDef* TIMx)
+{
+	if (TIMx == TIM1) __HAL_RCC_TIM3_CLK_DISABLE();
+	else if (TIMx == TIM2) __HAL_RCC_TIM2_CLK_DISABLE();
+	else if (TIMx == TIM3) __HAL_RCC_TIM3_CLK_DISABLE();
+	else if (TIMx == TIM4) __HAL_RCC_TIM4_CLK_DISABLE();
+	else if (TIMx == TIM5) __HAL_RCC_TIM5_CLK_DISABLE();
+	else if (TIMx == TIM6) __HAL_RCC_TIM6_CLK_DISABLE();
+	else if (TIMx == TIM7) __HAL_RCC_TIM7_CLK_DISABLE();
+	else if (TIMx == TIM8) __HAL_RCC_TIM8_CLK_DISABLE();
+	else if (TIMx == TIM9) __HAL_RCC_TIM9_CLK_DISABLE();
+	else if (TIMx == TIM10) __HAL_RCC_TIM10_CLK_DISABLE();
+	else if (TIMx == TIM11) __HAL_RCC_TIM11_CLK_DISABLE();
+	else if (TIMx == TIM12) __HAL_RCC_TIM12_CLK_DISABLE();
+	else if (TIMx == TIM13) __HAL_RCC_TIM13_CLK_DISABLE();
+	else if (TIMx == TIM14) __HAL_RCC_TIM14_CLK_DISABLE();
+	else
+	{
+		Error_Handler(__FILE__, __LINE__);
+	}
+}
+
+uint8_t tim_af_get(TIM_TypeDef* TIMx)
+{
+	uint8_t af = 0;
+
+	if (TIMx == TIM1) af = GPIO_AF1_TIM1;
+	else if (TIMx == TIM2) af = GPIO_AF1_TIM2;
+	else if (TIMx == TIM3) af = GPIO_AF2_TIM3;
+	else if (TIMx == TIM4) af = GPIO_AF2_TIM4;
+	else if (TIMx == TIM5) af = GPIO_AF2_TIM5;
+	else if (TIMx == TIM8) af = GPIO_AF3_TIM8;
+	else if (TIMx == TIM9) af = GPIO_AF3_TIM9;
+	else if (TIMx == TIM10) af = GPIO_AF3_TIM10;
+	else if (TIMx == TIM11) af = GPIO_AF3_TIM11;
+	else if (TIMx == TIM12) af = GPIO_AF9_TIM12;
+	else if (TIMx == TIM13) af = GPIO_AF9_TIM13;
+	else if (TIMx == TIM14) af = GPIO_AF9_TIM14;
+	else
+	{
+		Error_Handler(__FILE__, __LINE__);
+	}
+	return af;
+}
+
+void tim_gpio_config(TIM_TypeDef* TIMx, GPIO_TypeDef* GPIOx, uint16_t GPIO_PinX) {
+    GPIO_InitTypeDef   GPIO_InitStruct;
+
+	rcc_tim_gpio_enable(GPIOx);
+	rcc_tim_enable(TIMx);
+
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = tim_af_get(TIMx);
+	GPIO_InitStruct.Pin = GPIO_PinX;
+	HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
+}

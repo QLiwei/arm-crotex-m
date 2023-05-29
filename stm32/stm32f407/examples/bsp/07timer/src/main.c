@@ -12,7 +12,7 @@
 
 void key_handle(void);
 
-void tim01_task(void) {
+void tim01_task(void *parameter) {
 	switch_led_toggle(DEVICE_LED01);
 }
 

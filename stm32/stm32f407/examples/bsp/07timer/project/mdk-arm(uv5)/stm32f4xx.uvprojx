@@ -441,6 +441,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\dirvers\driver_timer\driver_timer_it.c</FilePath>
             </File>
+            <File>
+              <FileName>driver_pwm_out.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\dirvers\driver_timer\driver_pwm_out.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -141,6 +141,7 @@ void driver_tim_base_config(driver_tim_id_e _id, driver_tim_config_t _config) {
     assert_param(_config.cycle > 0);
     assert_param(_config.task != NULL);
 
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     uint32_t tim_clk = tim_clk_get(dev[_id].timx) / (dev[_id].clock_division + 1); // 42MHZ
     uint32_t prescaler; // 预分频
@@ -178,6 +179,12 @@ void driver_tim_base_config(driver_tim_id_e _id, driver_tim_config_t _config) {
         Error_Handler(__FILE__, __LINE__);
     }
 
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&dev[_id].htimx, &sClockSourceConfig) != HAL_OK)
+    {
+        Error_Handler(__FILE__, __LINE__);
+    }
+
     if (((dev[_id].timx) == TIM1) || ((dev[_id].timx) == TIM5) || ((dev[_id].timx) == TIM6)) {
         sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
         sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
@@ -204,7 +211,7 @@ void driver_tim_base_irq(driver_tim_id_e _id) {
         if (__HAL_TIM_GET_IT_SOURCE(&dev[_id].htimx, TIM_IT_UPDATE) != RESET)
         {
             __HAL_TIM_CLEAR_IT(&dev[_id].htimx, TIM_IT_UPDATE);
-            dev[_id].config.task();
+            dev[_id].config.task(dev[_id].config.parameter);
             if (dev[_id].config.mode == MODE_ONESHOT) {
                 HAL_TIM_Base_Stop(&dev[_id].htimx);
             }
