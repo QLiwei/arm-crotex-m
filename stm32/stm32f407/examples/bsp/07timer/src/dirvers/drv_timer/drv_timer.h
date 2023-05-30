@@ -17,6 +17,21 @@
 extern "C" {
 #endif
 
+#define USE_DRV_TIM1
+#define USE_DRV_TIM2
+// #define USE_DRV_TIM3
+// #define USE_DRV_TIM4
+// #define USE_DRV_TIM5
+// #define USE_DRV_TIM6
+// #define USE_DRV_TIM7
+// #define USE_DRV_TIM8
+// #define USE_DRV_TIM9
+// #define USE_DRV_TIM10
+// #define USE_DRV_TIM11
+// #define USE_DRV_TIM12
+// #define USE_DRV_TIM13
+// #define USE_DRV_TIM14
+
 void rcc_tim_gpio_enable(GPIO_TypeDef* GPIOx);
 uint32_t tim_clk_get(TIM_TypeDef* TIMx);
 void rcc_tim_enable(TIM_TypeDef* TIMx);
@@ -25,20 +40,48 @@ uint8_t tim_af_get(TIM_TypeDef* TIMx);
 void tim_gpio_config(TIM_TypeDef* TIMx, GPIO_TypeDef* GPIOx, uint16_t GPIO_PinX);
 
 typedef enum {
+#ifdef USE_DRV_TIM1
     DRV_TIM1 = 0,    // [Advanced]       Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: yes   APB2:MAX-168MHz
+#endif
+#ifdef USE_DRV_TIM2
     DRV_TIM2,        // [General] 32bits Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM3
     DRV_TIM3,        // [General]        Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM4
     DRV_TIM4,        // [General]        Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM5
     DRV_TIM5,        // [General] 32bits Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM6
     DRV_TIM6,        // [Basic]          Up              Capture compare channels:0                              APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM7
     DRV_TIM7,        // [Basic]          Up              Capture compare channels:0                              APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM8
     DRV_TIM8,        // [Advanced]       Up,Dowm,Up/Down Capture compare channels:4 Complemen-tary output: yes   APB2:MAX-168MHz
+#endif
+#ifdef USE_DRV_TIM9
     DRV_TIM9,        // [General]        Up              Capture compare channels:2 Complemen-tary output: no    APB2:MAX-168MHz
+#endif
+#ifdef USE_DRV_TIM10
     DRV_TIM10,       // [General]        Up              Capture compare channels:1 Complemen-tary output: no    APB2:MAX-168MHz
+#endif
+#ifdef USE_DRV_TIM11
     DRV_TIM11,       // [General]        Up              Capture compare channels:1 Complemen-tary output: no    APB2:MAX-168MHz
+#endif
+#ifdef USE_DRV_TIM12
     DRV_TIM12,       // [General]        Up              Capture compare channels:2 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM13
     DRV_TIM13,       // [General]        Up              Capture compare channels:1 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
+#ifdef USE_DRV_TIM14
     DRV_TIM14,       // [General]        Up              Capture compare channels:1 Complemen-tary output: no    APB1:MAX-84MHz
+#endif
     DRV_TIM_NONE,
 }drv_tim_id_e;
 
@@ -86,22 +129,17 @@ typedef struct {
     pwm_mode_e mode;
     uint32_t frequency;
     uint16_t default_duty_cycle; // 100%-10000 1%-100
-    bool channel1_enable;
-    bool channel2_enable;
-    bool channel3_enable;
-    bool channel4_enable;
-    bool channel1_n_enable;
-    bool channel2_n_enable;
-    bool channel3_n_enable;
+    bool channel_enable[4];
+    bool channel_n_enable[3];
     bool brake_enable;
     uint8_t brake_time;
     brake_call_back call_back;
     void *parameter;
 }drv_pwm_out_config_t;
 void drv_pwm_out_config(drv_tim_id_e _id, drv_pwm_out_config_t _config);
-void drv_pwm_out_duty_cycle(drv_tim_id_e _id, pwm_channel_e _channel, uint16_t _duty);
-void drv_pwm_out_start(drv_tim_id_e _id, pwm_channel_e _channel);
-void drv_pwm_out_stop(drv_tim_id_e _id, pwm_channel_e _channel);
+error_t drv_pwm_out_duty_set(drv_tim_id_e _id, pwm_channel_e _channel, uint16_t _duty);
+error_t drv_pwm_out_start(drv_tim_id_e _id, pwm_channel_e _channel);
+error_t drv_pwm_out_stop(drv_tim_id_e _id, pwm_channel_e _channel);
 void drv_pwm_out_brake_irq(drv_tim_id_e _id);
 
 #ifdef __cplusplus

@@ -16,7 +16,12 @@
   */
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM1
+    drv_pwm_out_brake_irq(DRV_TIM1);
+#endif
+#ifdef USE_DRV_TIM9
     drv_tim_base_irq(DRV_TIM9);
+#endif
 }
 
 /**
@@ -24,8 +29,12 @@ void TIM1_BRK_TIM9_IRQHandler(void)
   */
 void TIM1_UP_TIM10_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM1
     drv_tim_base_irq(DRV_TIM1);
+#endif
+#ifdef USE_DRV_TIM10
     drv_tim_base_irq(DRV_TIM10);
+#endif
 }
 
 /**
@@ -33,7 +42,9 @@ void TIM1_UP_TIM10_IRQHandler(void)
   */
 void TIM1_TRG_COM_TIM11_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM11
     drv_tim_base_irq(DRV_TIM11);
+#endif
 }
 
 /**
@@ -49,7 +60,9 @@ void TIM1_CC_IRQHandler(void)
   */
 void TIM2_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM2
     drv_tim_base_irq(DRV_TIM2);
+#endif
 }
 
 /**
@@ -57,7 +70,9 @@ void TIM2_IRQHandler(void)
   */
 void TIM3_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM3
     drv_tim_base_irq(DRV_TIM3);
+#endif
 }
 
 /**
@@ -65,7 +80,9 @@ void TIM3_IRQHandler(void)
   */
 void TIM4_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM4
     drv_tim_base_irq(DRV_TIM4);
+#endif
 }
 
 /**
@@ -73,7 +90,12 @@ void TIM4_IRQHandler(void)
   */
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM8
+    drv_pwm_out_brake_irq(DRV_TIM8);
+#endif
+#ifdef USE_DRV_TIM12
     drv_tim_base_irq(DRV_TIM12);
+#endif
 }
 
 /**
@@ -81,8 +103,12 @@ void TIM8_BRK_TIM12_IRQHandler(void)
   */
 void TIM8_UP_TIM13_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM8
     drv_tim_base_irq(DRV_TIM8);
+#endif
+#ifdef USE_DRV_TIM13
     drv_tim_base_irq(DRV_TIM13);
+#endif
 }
 
 /**
@@ -90,7 +116,9 @@ void TIM8_UP_TIM13_IRQHandler(void)
   */
 void TIM8_TRG_COM_TIM14_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM14
     drv_tim_base_irq(DRV_TIM14);
+#endif
 }
 
 /**
@@ -106,7 +134,9 @@ void TIM8_CC_IRQHandler(void)
   */
 void TIM5_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM5
     drv_tim_base_irq(DRV_TIM5);
+#endif
 }
 
 /**
@@ -114,7 +144,9 @@ void TIM5_IRQHandler(void)
   */
 void TIM6_DAC_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM6
     drv_tim_base_irq(DRV_TIM6);
+#endif
 }
 
 /**
@@ -122,5 +154,7 @@ void TIM6_DAC_IRQHandler(void)
   */
 void TIM7_IRQHandler(void)
 {
+#ifdef USE_DRV_TIM7
     drv_tim_base_irq(DRV_TIM7);
+#endif
 }

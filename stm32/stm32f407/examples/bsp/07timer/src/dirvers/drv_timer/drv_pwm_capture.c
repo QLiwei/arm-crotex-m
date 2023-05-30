@@ -1,5 +1,5 @@
 /**
- * @file drv_pwm_capture.c
+ * @file drv_pwm_out_capture.c
  * @brief pwm capture driver
  * @copyright Copyright (c) 2023
  *

@@ -44,6 +44,25 @@ int main(void)
 	};
 	drv_tim_base_config(DRV_TIM1, config);
 	drv_tim_base_start(DRV_TIM1);
+
+	drv_pwm_out_config_t pwm2_config = {
+		.mode = PWM_MODE1,
+		.frequency = 15000,
+		.default_duty_cycle = 0,
+		.channel_enable[0] = true,
+		.channel_enable[1] = true,
+		.channel_enable[2] = true,
+		.channel_enable[3] = true,
+	};
+	drv_pwm_out_config(DRV_TIM2, pwm2_config);
+	drv_pwm_out_duty_set(DRV_TIM2, PWM_CHANNEL_1, 0);
+	drv_pwm_out_duty_set(DRV_TIM2, PWM_CHANNEL_2, 5000);
+	drv_pwm_out_duty_set(DRV_TIM2, PWM_CHANNEL_3, 7500);
+	drv_pwm_out_duty_set(DRV_TIM2, PWM_CHANNEL_4, 10000);
+	drv_pwm_out_start(DRV_TIM2, PWM_CHANNEL_1);
+	drv_pwm_out_start(DRV_TIM2, PWM_CHANNEL_2);
+	drv_pwm_out_start(DRV_TIM2, PWM_CHANNEL_3);
+	drv_pwm_out_start(DRV_TIM2, PWM_CHANNEL_4);
 	while (1)
 	{
 		soft_timer_run();

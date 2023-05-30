@@ -422,11 +422,6 @@
               <FilePath>..\..\src\dirvers\base.c</FilePath>
             </File>
             <File>
-              <FileName>drv_pwm_capture.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\dirvers\drv_timer\drv_pwm_capture.c</FilePath>
-            </File>
-            <File>
               <FileName>drv_pwm_out.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\dirvers\drv_timer\drv_pwm_out.c</FilePath>

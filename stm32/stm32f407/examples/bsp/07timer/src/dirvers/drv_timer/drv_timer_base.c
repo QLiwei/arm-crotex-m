@@ -7,9 +7,42 @@
  * Data             Author                          Notes
  * 2023-05-18       vector(vector.qiu@gmail.com)    first version
  * 2023-05-29       vector                          rename driver to drv
+ * 2023-05-30       vector                          cutting and parameter inspection through macro definition
+ *
  */
 #include "drv_timer.h"
 
+#if defined(USE_DRV_TIM1) || defined(USE_DRV_TIM2) || defined(USE_DRV_TIM3) ||      \
+    defined(USE_DRV_TIM4) || defined(USE_DRV_TIM5) || defined(USE_DRV_TIM6) ||      \
+    defined(USE_DRV_TIM7) || defined(USE_DRV_TIM8) || defined(USE_DRV_TIM9) ||      \
+    defined(USE_DRV_TIM10) || defined(USE_DRV_TIM11) || defined(USE_DRV_TIM12) ||   \
+    defined(USE_DRV_TIM13) || defined(USE_DRV_TIM14)
+
+#define IS_DRV_TIM_BASE_ID(_id)     (((_id) == DRV_TIM1 )   ||    \
+                                    ((_id) == DRV_TIM2 )   ||    \
+                                    ((_id) == DRV_TIM3 )   ||    \
+                                    ((_id) == DRV_TIM4)    ||    \
+                                    ((_id) == DRV_TIM5 )   ||    \
+                                    ((_id) == DRV_TIM6 )   ||    \
+                                    ((_id) == DRV_TIM7 )   ||    \
+                                    ((_id) == DRV_TIM8 )   ||    \
+                                    ((_id) == DRV_TIM9 )   ||    \
+                                    ((_id) == DRV_TIM10 )  ||    \
+                                    ((_id) == DRV_TIM11 )  ||    \
+                                    ((_id) == DRV_TIM12 )  ||    \
+                                    ((_id) == DRV_TIM13 )  ||    \
+                                    ((_id) == DRV_TIM14 ))
+
+#define IS_DRV_TIM_BASE_MODE(_mode)         (((_mode) == MODE_ONESHOT) ||  \
+                                             ((_mode) == MODE_PERIOD))
+
+#define IS_DRV_TIM_BASE_TIME_UINT(_uint)    (((_uint) == UNIT_1US)      ||  \
+                                             ((_uint) == UNIT_10US)     ||  \
+                                             ((_uint) == UNIT_100US)    ||  \
+                                             ((_uint) == UNIT_1MS))
+
+#define IS_DRV_TIM_BASE_CYCLE(_cycle)   ((_cycle) > 0)
+#define IS_DRV_TIM_BASE_TASK(_tack)     ((_task != NULL)
 
 /*
  *  System Clock source            = PLL (HSE:8000000)
@@ -37,6 +70,7 @@ typedef struct {
     drv_tim_config_t config;
 }drv_timer_base_dev_t;
 static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
+#ifdef USE_DRV_TIM1
     {
         .timx = TIM1,
         .irqn_type = TIM1_UP_TIM10_IRQn,
@@ -44,6 +78,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
     },
+#endif
+#ifdef USE_DRV_TIM2
     {
         .timx = TIM2,
         .irqn_type = TIM2_IRQn,
@@ -51,6 +87,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM3
     {
         .timx = TIM3,
         .irqn_type = TIM3_IRQn,
@@ -58,6 +96,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM4
     {
         .timx = TIM4,
         .irqn_type = TIM4_IRQn,
@@ -65,6 +105,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM5
     {
         .timx = TIM5,
         .irqn_type = TIM5_IRQn,
@@ -72,6 +114,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM6
     {
         .timx = TIM6,
         .irqn_type = TIM6_DAC_IRQn,
@@ -79,6 +123,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM7
     {
         .timx = TIM7,
         .irqn_type = TIM7_IRQn,
@@ -86,6 +132,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM8
     {
         .timx = TIM8,
         .irqn_type = TIM8_UP_TIM13_IRQn,
@@ -93,6 +141,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
     },
+#endif
+#ifdef USE_DRV_TIM9
     {
         .timx = TIM9,
         .irqn_type = TIM1_BRK_TIM9_IRQn,
@@ -100,6 +150,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
     },
+#endif
+#ifdef USE_DRV_TIM10
     {
         .timx = TIM10,
         .irqn_type = TIM1_UP_TIM10_IRQn,
@@ -107,6 +159,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
     },
+#endif
+#ifdef USE_DRV_TIM11
     {
         .timx = TIM11,
         .irqn_type = TIM1_TRG_COM_TIM11_IRQn,
@@ -114,6 +168,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV4,
     },
+#endif
+#ifdef USE_DRV_TIM12
     {
         .timx = TIM12,
         .irqn_type = TIM8_BRK_TIM12_IRQn,
@@ -121,6 +177,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM13
     {
         .timx = TIM13,
         .irqn_type = TIM8_UP_TIM13_IRQn,
@@ -128,6 +186,8 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
+#ifdef USE_DRV_TIM14
     {
         .timx = TIM14,
         .irqn_type = TIM8_TRG_COM_TIM14_IRQn,
@@ -135,12 +195,15 @@ static drv_timer_base_dev_t dev[DRV_TIM_NONE] = {
         .sub_priority = 0,
         .clock_division = TIM_CLOCKDIVISION_DIV2,
     },
+#endif
 };
 
 void drv_tim_base_config(drv_tim_id_e _id, drv_tim_config_t _config) {
-    assert_param(_id < DRV_TIM_NONE);
-    assert_param(_config.cycle > 0);
-    assert_param(_config.task != NULL);
+    assert_param(IS_DRV_TIM_BASE_ID(_id));
+    assert_param(IS_DRV_TIM_BASE_MODE(_config.mode));
+    assert_param(IS_DRV_TIM_BASE_TIME_UINT(_config.time_uint));
+    assert_param(IS_DRV_TIM_BASE_CYCLE(_config.cycle));
+    assert_param(IS_DRV_TIM_BASE_TASK(_config.task));
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -197,12 +260,12 @@ void drv_tim_base_config(drv_tim_id_e _id, drv_tim_config_t _config) {
 }
 
 void drv_tim_base_start(drv_tim_id_e _id) {
-    assert_param(_id < DRV_TIM_NONE);
+    assert_param(IS_DRV_TIM_BASE_ID(_id));
     HAL_TIM_Base_Start(&dev[_id].htimx);
 }
 
 void drv_tim_base_stop(drv_tim_id_e _id) {
-    assert_param(_id < DRV_TIM_NONE);
+    assert_param(IS_DRV_TIM_BASE_ID(_id));
     HAL_TIM_Base_Stop(&dev[_id].htimx);
 }
 
@@ -220,3 +283,4 @@ void drv_tim_base_irq(drv_tim_id_e _id) {
     }
 }
 
+#endif
